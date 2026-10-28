@@ -1,14 +1,26 @@
+import { MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { buildProductWhatsappUrl } from "@/lib/orders/whatsapp";
 import { canPurchase, maxPurchasableQuantity } from "@/lib/products/availability";
 import type { Product } from "@/lib/products/types";
 import { AddToCart } from "./add-to-cart";
 import { AvailabilityBadge } from "./availability-badge";
+import { buttonStyles } from "./button-link";
 import { ProductImage } from "./product-image";
 import { ProductPrice } from "./product-price";
 
 // Body of /produtos/[slug], shared by the server page and the demo page.
+// The WhatsApp number comes from the server (storeConfig) as a prop.
 
-export function ProductDetailView({ product }: { product: Product }) {
+export function ProductDetailView({
+  product,
+  whatsappNumber,
+  storeName,
+}: {
+  product: Product;
+  whatsappNumber: string;
+  storeName: string;
+}) {
   const [mainImage, ...otherImages] = product.images;
 
   return (
@@ -70,6 +82,17 @@ export function ProductDetailView({ product }: { product: Product }) {
             maxQuantity={maxPurchasableQuantity(product)}
           />
         </div>
+
+        <a
+          href={buildProductWhatsappUrl(whatsappNumber, storeName, product)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${buttonStyles.secondary} mt-3`}
+        >
+          <MessageCircle aria-hidden className="size-4" />
+          Tirar dúvidas pelo WhatsApp
+          <span className="sr-only">(abre em nova aba)</span>
+        </a>
 
         <section aria-labelledby="descricao" className="mt-8 border-t border-border pt-6">
           <h2 id="descricao" className="font-semibold">

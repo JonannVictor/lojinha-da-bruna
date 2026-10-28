@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { DemoProductDetail } from "@/components/demo/storefront";
 import { ProductDetailSkeleton, ProductDetailView } from "@/components/product-detail";
+import { storeConfig } from "@/config/store";
 import { isDemoMode } from "@/lib/demo/mode";
 import { getProductBySlug } from "@/lib/products/repository";
 
@@ -43,9 +44,10 @@ async function ProductDetail({
   params,
 }: Pick<PageProps<"/produtos/[slug]">, "params">) {
   const { slug } = await params;
-  if (isDemoMode()) return <DemoProductDetail slug={slug} />;
+  const whatsapp = { whatsappNumber: storeConfig.whatsappNumber, storeName: storeConfig.name };
+  if (isDemoMode()) return <DemoProductDetail slug={slug} {...whatsapp} />;
 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
-  return <ProductDetailView product={product} />;
+  return <ProductDetailView product={product} {...whatsapp} />;
 }

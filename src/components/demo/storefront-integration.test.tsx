@@ -11,6 +11,8 @@ import { MemoryStorage } from "@/test/memory-storage";
 // Panel → storefront: what is saved through the panel actions is rendered by
 // the same components the store pages use.
 
+const whatsapp = { whatsappNumber: "555481394629", storeName: "Lojinha da Bruna" };
+
 function setup() {
   const store = createDemoStore({ getStorage: () => new MemoryStorage() });
   return { store, actions: createDemoAdminActions(store.repository) };
@@ -45,8 +47,10 @@ describe("panel and storefront integration", () => {
     expect(html).toContain("R$ 12,50");
 
     const product = storefrontProducts(state).find((p) => p.id === createdId)!;
-    const page = renderToStaticMarkup(<ProductDetailView product={product} />);
+    const page = renderToStaticMarkup(<ProductDetailView product={product} {...whatsapp} />);
     expect(page).toContain("Esmalte cintilante");
+    expect(page).toContain('href="https://wa.me/555481394629?text=');
+    expect(page).toContain(encodeURIComponent("“Esmalte cintilante” (Marca Y)").replace(/'/g, "%27"));
     expect(page).toContain("2 unidades disponíveis");
     expect(page).toContain("Adicionar ao carrinho");
   });
@@ -61,7 +65,7 @@ describe("panel and storefront integration", () => {
     expect(renderCatalog(state)).not.toContain("Kit presente");
 
     const outOfStock = storefrontProducts(state).find((p) => p.name.startsWith("Base"))!;
-    const page = renderToStaticMarkup(<ProductDetailView product={outOfStock} />);
+    const page = renderToStaticMarkup(<ProductDetailView product={outOfStock} {...whatsapp} />);
     expect(page).toContain("Esgotado");
     expect(page).toContain("não está disponível para compra");
     expect(page).not.toContain("Adicionar ao carrinho");

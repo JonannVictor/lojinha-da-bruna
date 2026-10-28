@@ -66,7 +66,15 @@ export function DemoCatalog() {
   );
 }
 
-export function DemoProductDetail({ slug }: { slug: string }) {
+export function DemoProductDetail({
+  slug,
+  whatsappNumber,
+  storeName,
+}: {
+  slug: string;
+  whatsappNumber: string;
+  storeName: string;
+}) {
   const store = useStorefront();
   if (!store) return <ProductDetailSkeleton />;
 
@@ -84,5 +92,5 @@ export function DemoProductDetail({ slug }: { slug: string }) {
       </div>
     );
   }
-  return <ProductDetailView product={product} />;
+  return <ProductDetailView product={product} whatsappNumber={whatsappNumber} storeName={storeName} />;
 }

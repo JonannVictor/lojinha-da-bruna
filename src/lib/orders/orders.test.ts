@@ -102,8 +102,9 @@ describe("WhatsApp message", () => {
 });
 
 describe("placeOrder", () => {
-  it("is disabled while the WhatsApp number is not configured", async () => {
-    vi.stubEnv("WHATSAPP_NUMBER", "");
+  it("saving orders is off without Supabase and refuses without a number", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "");
     expect(isCheckoutEnabled()).toBe(false);
 
     const fake = createFakeClient();

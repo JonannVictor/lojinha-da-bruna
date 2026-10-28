@@ -2,8 +2,8 @@
 
 Versão da loja para apresentar à Bruna **sem Supabase**: a vitrine e o painel
 funcionam por completo, mas os dados ficam salvos apenas no navegador de quem
-está usando (`localStorage`). Nada é enviado a um servidor, e nenhum pedido é
-criado.
+está usando (`localStorage`). Nada é enviado a um servidor, e o site não
+registra pedidos.
 
 > **Não é um ambiente de produção.** O painel abre sem login, os dados são
 > fictícios e qualquer pessoa com acesso ao navegador pode alterá-los. Não use
@@ -25,8 +25,13 @@ Para desativar, remova a variável (ou use qualquer valor diferente de `true`) e
 reinicie. A implementação com Supabase continua intacta e volta a ser usada.
 
 Com o modo ligado, o servidor nunca consulta o Supabase, mesmo que as
-variáveis dele estejam preenchidas, e a finalização pelo WhatsApp fica sempre
-desativada.
+variáveis dele estejam preenchidas.
+
+**WhatsApp na demonstração:** o botão "Finalizar pedido pelo WhatsApp" abre o
+WhatsApp **real** da loja (+55 54 8139-4629) com os produtos do carrinho. Como
+os produtos são fictícios, o carrinho avisa para enviar a mensagem apenas em
+testes combinados com a Bruna. Nada é enviado automaticamente: o cliente
+revisa e envia.
 
 **Proteção contra produção:** o build falha se `NEXT_PUBLIC_DEMO_MODE=true` e
 `VERCEL_ENV=production`. Para mostrar a demonstração pela Vercel, use um
@@ -39,7 +44,7 @@ deploy de **Preview**. (Nenhum deploy foi feito nesta etapa.)
   explica isso e leva ao painel)
 
 Uma faixa amarela identifica a demonstração na loja e no painel, e o
-carrinho informa que a finalização está desativada.
+carrinho avisa que os produtos são fictícios antes de abrir o WhatsApp.
 
 ## O que dá para fazer
 
@@ -49,7 +54,7 @@ carrinho informa que a finalização está desativada.
 | Produtos | Busca por nome ou marca, filtros por categoria e status, cadastro, edição, ativação/desativação, exclusão com confirmação, até 3 fotos por produto com pré-visualização. |
 | Categorias | Criação, edição de nome e endereço, ordem, ativação/desativação e exclusão (só sem produtos). |
 | Pedidos | Pedidos fictícios `DEMO-…`, com itens, subtotal e troca de status. |
-| Loja | Produtos e categorias do painel, busca, filtros, página do produto e carrinho. |
+| Loja | Produtos e categorias do painel, busca, filtros, página do produto (com botão de dúvidas pelo WhatsApp) e carrinho com finalização pelo WhatsApp. |
 
 ## Restaurar os dados iniciais
 

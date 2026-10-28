@@ -222,7 +222,8 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
   páginas escolhem a origem (servidor ou navegador). URLs inalteradas.
 - O carrinho foi dividido em `CartContents` (apresentação) com duas fontes:
   `CartView` (server action) e `DemoCartView` (catálogo local). Na
-  demonstração, o botão de finalizar fica desativado com aviso explícito.
+  demonstração, o botão abre o WhatsApp com os produtos do carrinho e avisa
+  que eles são fictícios (ver "Integração com o WhatsApp").
 
 ## Fotos
 
@@ -237,6 +238,39 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
 
 ## Pedidos de demonstração
 
-- Apenas os três pedidos iniciais, fictícios. O carrinho não cria pedidos na
-  demonstração, para não simular uma venda ou uma integração com WhatsApp.
+- Apenas os três pedidos iniciais, fictícios. O carrinho não grava pedidos
+  na demonstração: ele só abre o WhatsApp, e o cliente decide se envia.
 - `/admin/pedidos` só existe no modo demonstração (404 fora dele).
+
+---
+
+# Decisões — Integração com o WhatsApp
+
+- **Número em um único lugar:** `STORE_WHATSAPP_NUMBER` em
+  `src/config/store.ts` (`555481394629`). `WHATSAPP_NUMBER` continua
+  aceito como substituição por ambiente; vazio ou inválido usa o oficial. O
+  número é lido no servidor e passado às telas como propriedade.
+- **Dois modos de finalização** (`Checkout` em `carrinho/cart-view.tsx`):
+  com Supabase e chave secreta, o fluxo da Etapa 2 (grava o pedido e depois
+  abre o WhatsApp); nos demais casos, inclusive no modo demonstração, um link
+  `wa.me` direto (`buildCartWhatsappLink`). O fluxo com Supabase abre na
+  mesma aba, porque a URL só existe depois da resposta do servidor e abrir
+  uma aba após uma espera é bloqueado pelos navegadores.
+- **Link comum, em nova aba** (`<a target="_blank" rel="noopener noreferrer">`),
+  e não `window.open`: respeita o comportamento do navegador (abrir em aba,
+  copiar link) e nunca é barrado como pop-up. A mensagem usa
+  `encodeURIComponent`.
+- **Dados atuais:** a mensagem é montada a partir de `summarizeCart`, com os
+  produtos do catálogo (servidor, ou repositório local na demonstração),
+  nunca de valores guardados no carrinho. Só itens compráveis entram, com a
+  quantidade limitada ao estoque. No modo servidor, o carrinho relê o
+  catálogo quando a aba volta ao primeiro plano; na demonstração, o estado
+  local já é sempre o atual.
+- **Botão desativado** quando nenhum item pode ser comprado (carrinho vazio
+  mostra o estado vazio, sem botão).
+- **Texto da mensagem:** sem frete, desconto, taxa ou forma de pagamento;
+  informa que o valor é só dos produtos e pede a confirmação da
+  disponibilidade. O site nunca diz que o pedido foi enviado ou confirmado.
+- **Página de produto:** botão "Tirar dúvidas pelo WhatsApp" com o nome, a
+  marca e o preço (quando confirmado), também para produtos esgotados ou com
+  preço a confirmar.

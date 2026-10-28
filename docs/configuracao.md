@@ -9,16 +9,30 @@
 | `SUPABASE_SECRET_KEY`                  | Para pedidos     | **Não**              | Chave secreta (`sb_secret_…`). Usada apenas no servidor, para executar `create_order`. Nunca use prefixo `NEXT_PUBLIC_`. |
 | `NEXT_PUBLIC_DEMO_MODE`                | Não              | Sim                  | `true`: modo demonstração (dados no navegador, painel sem login, sem Supabase). Bloqueado em produção. Ver [demonstracao.md](demonstracao.md). |
 | `CATALOG_SOURCE`                       | Não              | Não                  | Vazio: Supabase, se configurado; senão, catálogo vazio. `demo`: produtos fictícios (ignorado em produção). `empty`: força o catálogo vazio. |
-| `WHATSAPP_NUMBER`                      | Pendente         | Não                  | Número da Bruna, só dígitos, com DDI 55 e DDD. Enquanto vazio, o link não aparece no rodapé e a finalização de pedidos fica desligada. |
+| `WHATSAPP_NUMBER`                      | Não              | Não                  | Substitui o número oficial (definido em `src/config/store.ts`) neste ambiente, ex.: um número de teste. Só dígitos, com DDI 55 e DDD. Vazio ou inválido: usa o oficial. |
 
 Localmente, use `.env.local` (copie de `.env.example`). Na Vercel, cadastre em
 Project → Settings → Environment Variables, ou com `vercel env add`. Um novo
 deploy é necessário depois de alterar uma variável.
 
-A finalização de pedidos só é ativada quando **as três** condições existem: o
-catálogo vem do Supabase, `SUPABASE_SECRET_KEY` está definida e
-`WHATSAPP_NUMBER` é válido. Sem isso, o botão "Finalizar pelo WhatsApp" segue
-desativado, como na Etapa 1.
+## WhatsApp
+
+O número que recebe os pedidos é **+55 54 8139-4629**. Ele fica em um único
+lugar: a constante `STORE_WHATSAPP_NUMBER` em `src/config/store.ts`. Para
+trocá-lo, altere essa linha (só dígitos: 55 + DDD + número). Rodapé, carrinho
+e páginas de produto usam esse valor.
+
+O botão "Finalizar pedido pelo WhatsApp" funciona de duas formas:
+
+- **Sem Supabase (ou no modo demonstração):** abre o WhatsApp em nova aba com
+  a lista de produtos, quantidades, preços, subtotais e total já escritos. O
+  cliente revisa e envia; o site não registra o pedido.
+- **Com Supabase e `SUPABASE_SECRET_KEY`:** o pedido é gravado no banco
+  (`create_order`) e só então o WhatsApp é aberto, na mesma aba.
+
+Em ambos os casos, só entram itens disponíveis, com preço e estoque atuais.
+A mensagem informa que o valor é apenas dos produtos e que entrega e
+pagamento são combinados com a Bruna. O pedido nunca é declarado confirmado.
 
 Passo a passo do Supabase (projeto, migrações, Storage, primeira
 administradora e validação de segurança): [supabase.md](supabase.md).
@@ -27,7 +41,7 @@ administradora e validação de segurança): [supabase.md](supabase.md).
 
 Nada abaixo foi inventado. Os campos ficam vazios até a confirmação:
 
-- [ ] Número de WhatsApp para pedidos (`WHATSAPP_NUMBER`).
+- [x] Número de WhatsApp para pedidos: +55 54 8139-4629 (`src/config/store.ts`).
 - [ ] Lista de produtos com nome, marca, preço, descrição, estoque e
       categoria confirmados (cadastro pelo painel `/admin`).
 - [ ] Fotos reais dos produtos (ou autorização para fotografá-los).

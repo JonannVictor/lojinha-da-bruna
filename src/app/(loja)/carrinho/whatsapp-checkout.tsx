@@ -12,13 +12,11 @@ export function WhatsappCheckout({
   items,
   number,
   storeName,
-  hasUnavailable,
   demo,
 }: {
   items: CartItem[];
   number: string;
   storeName: string;
-  hasUnavailable: boolean;
   demo: boolean;
 }) {
   const link = buildCartWhatsappLink(number, storeName, items);
@@ -60,9 +58,6 @@ export function WhatsappCheckout({
             Nenhum item disponível para finalizar. Remova os itens indisponíveis
             ou adicione outros produtos.
           </p>
-        )}
-        {link && hasUnavailable && (
-          <p className="text-warning">Itens indisponíveis não entram na mensagem.</p>
         )}
         {demo && (
           <p className="flex gap-2 rounded-xl bg-warning-soft px-3 py-2.5 text-warning">

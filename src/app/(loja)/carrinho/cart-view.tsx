@@ -176,7 +176,7 @@ function CartContents({
         </dl>
         {hasUnavailable && (
           <p className="mt-3 text-xs text-warning">
-            Itens indisponíveis não entram no subtotal.
+            Itens indisponíveis não entram no total nem no pedido.
           </p>
         )}
         <p className="mt-4 text-xs text-muted">
@@ -200,7 +200,6 @@ function CartContents({
             items={items}
             number={checkout.number}
             storeName={checkout.storeName}
-            hasUnavailable={hasUnavailable}
             demo={checkout.demo}
           />
         )}
@@ -245,7 +244,7 @@ function CartRow({ item }: { item: CartItem }) {
             {!purchasable && (
               <p className="mt-1 text-sm text-danger">
                 {product
-                  ? `${availabilityLabel[getAvailability(product)]}: remova este item para continuar.`
+                  ? `${availabilityLabel[getAvailability(product)]}: este item não entra no pedido.`
                   : "Este item não está mais no catálogo."}
               </p>
             )}
