@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { ProductInput } from "@/lib/admin/validation";
 import { filterProducts } from "@/lib/products/search";
@@ -9,6 +11,7 @@ import {
   createProduct,
   deleteCategory,
   deleteProduct,
+  DEMO_IMAGE_DIR,
   MAX_DEMO_IMAGES_PER_PRODUCT,
   moveCategory,
   orderSubtotal,
@@ -58,13 +61,17 @@ function input(overrides: Partial<ProductInput> = {}): ProductInput {
 }
 
 describe("seed", () => {
-  it("is clearly fictitious and has no photos", () => {
+  it("is clearly fictitious and pictured by bundled illustrations", () => {
     const state = seed();
     expect(state.products.length).toBeGreaterThan(0);
     for (const product of state.products) {
       expect(product.name).toMatch(/\(exemplo\)$/);
       expect(product.brand).toBe("Marca fictícia");
-      expect(product.images).toEqual([]);
+      expect(product.images).toHaveLength(1);
+      const [image] = product.images;
+      expect(image.url.startsWith(`${DEMO_IMAGE_DIR}/`)).toBe(true);
+      expect(image.alt).toMatch(/^Ilustração /);
+      expect(existsSync(join(process.cwd(), "public", image.url))).toBe(true);
     }
     expect(state.orders.every((o) => o.code.startsWith("DEMO-"))).toBe(true);
   });
@@ -149,7 +156,7 @@ describe("products", () => {
   it("manages photos: add, main photo, remove and per-product limit", () => {
     let state = seed();
     const id = state.products[0].id;
-    for (let i = 0; i < MAX_DEMO_IMAGES_PER_PRODUCT; i++) {
+    for (let i = state.products[0].images.length; i < MAX_DEMO_IMAGES_PER_PRODUCT; i++) {
       state = ok(addProductImage(state, id, { url: PIXEL, alt: `foto ${i}` }, ctx())).state;
     }
     expect(addProductImage(state, id, { url: PIXEL, alt: "" }, ctx())).toEqual({ ok: false, reason: "invalid" });
@@ -274,7 +281,12 @@ describe("parseDemoState", () => {
     const state = seed();
     const raw = JSON.parse(JSON.stringify(state));
     raw.products[0].price_cents = -5;
-    raw.products[1].images = [{ id: "x", url: "javascript:alert(1)", alt: "" }, { id: "y", url: PIXEL, alt: "ok" }];
+    raw.products[1].images = [
+      { id: "x", url: "javascript:alert(1)", alt: "" },
+      { id: "y", url: PIXEL, alt: "ok" },
+      { id: "z", url: `${DEMO_IMAGE_DIR}/../../x.webp`, alt: "" },
+      { id: "w", url: "https://example.com/demo/produtos/a.webp", alt: "" },
+    ];
     raw.products[2].category_id = "categoria-que-nao-existe";
     raw.products.push({ ...raw.products[3] }); // duplicated id
     raw.categories.push({ nonsense: true });

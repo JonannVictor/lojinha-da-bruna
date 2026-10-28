@@ -4,12 +4,13 @@ import { AvailabilityBadge } from "./availability-badge";
 import { ProductImage } from "./product-image";
 import { ProductPrice } from "./product-price";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, priority }: { product: Product; priority?: boolean }) {
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-accent/40">
+    <article className="group relative flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-accent/40">
       <ProductImage
         image={product.images[0]}
         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
+        priority={priority}
       />
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         {product.brand && (

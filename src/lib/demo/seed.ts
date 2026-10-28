@@ -1,11 +1,12 @@
 import { initialCategories } from "@/lib/products/categories";
-import { DEMO_STATE_VERSION, type DemoOrder, type DemoProduct, type DemoState } from "./model";
+import { DEMO_IMAGE_DIR, DEMO_STATE_VERSION, type DemoOrder, type DemoProduct, type DemoState } from "./model";
 
 // Initial demo data. Every product, price, stock value and order below is
 // FICTITIOUS, made only to show how the store works: none of them is a
 // product sold by Bruna. Names end in "(exemplo)", the brand is "Marca
-// fictícia" and there are no photos, so nothing passes as a real item. The
-// categories come from the project brief.
+// fictícia" and the pictures are illustrations made for the demo (no brand,
+// in public/demo/produtos), so nothing passes as a real item. The categories
+// come from the project brief.
 
 export const DEMO_DESCRIPTION =
   "Produto fictício, criado apenas para demonstrar a loja. Não está à venda.";
@@ -15,6 +16,7 @@ const DEMO_BRAND = "Marca fictícia";
 /** Stable ids (valid UUIDs) keep carts and links working across resets. */
 const categoryId = (n: number) => `de000000-0000-4000-8000-00000000000${n}`;
 const productId = (n: number) => `de000000-0000-4000-8000-1000000000${String(n).padStart(2, "0")}`;
+const imageId = (n: number) => `de000000-0000-4000-8000-3000000000${String(n).padStart(2, "0")}`;
 const orderId = (n: number) => `de000000-0000-4000-8000-2000000000${String(n).padStart(2, "0")}`;
 
 type SeedProduct = {
@@ -25,20 +27,30 @@ type SeedProduct = {
   stock_quantity: number | null;
   is_active?: boolean;
   is_featured?: boolean;
+  /** File in public/demo/produtos and its alt text. */
+  image: { file: string; alt: string };
 };
 
 const products: SeedProduct[] = [
-  { name: "Paleta de sombras (exemplo)", slug: "exemplo-paleta-de-sombras", category: 1, price_cents: 4500, stock_quantity: 6, is_featured: true },
-  { name: "Colônia floral (exemplo)", slug: "exemplo-colonia-floral", category: 2, price_cents: 8900, stock_quantity: null, is_featured: true },
-  { name: "Hidratante corporal (exemplo)", slug: "exemplo-hidratante-corporal", category: 3, price_cents: 2900, stock_quantity: 8, is_featured: true },
-  { name: "Necessaire de viagem (exemplo)", slug: "exemplo-necessaire-de-viagem", category: 4, price_cents: 3900, stock_quantity: 3, is_featured: true },
-  { name: "Body splash (exemplo)", slug: "exemplo-body-splash", category: 2, price_cents: 3500, stock_quantity: 12 },
+  { name: "Paleta de sombras (exemplo)", slug: "exemplo-paleta-de-sombras", category: 1, price_cents: 4500, stock_quantity: 6, is_featured: true,
+    image: { file: "paleta-de-sombras", alt: "Ilustração de uma paleta com nove sombras em tons nude, rosados e terrosos, com pincel" } },
+  { name: "Colônia floral (exemplo)", slug: "exemplo-colonia-floral", category: 2, price_cents: 8900, stock_quantity: null, is_featured: true,
+    image: { file: "colonia-floral", alt: "Ilustração de um frasco de vidro com colônia rosada e uma flor ao lado" } },
+  { name: "Hidratante corporal (exemplo)", slug: "exemplo-hidratante-corporal", category: 3, price_cents: 2900, stock_quantity: 8, is_featured: true,
+    image: { file: "hidratante-corporal", alt: "Ilustração de um frasco de hidratante com válvula pump e um pote de creme aberto" } },
+  { name: "Necessaire de viagem (exemplo)", slug: "exemplo-necessaire-de-viagem", category: 4, price_cents: 3900, stock_quantity: 3, is_featured: true,
+    image: { file: "necessaire-de-viagem", alt: "Ilustração de uma necessaire matelassê com zíper dourado e um batom ao lado" } },
+  { name: "Body splash (exemplo)", slug: "exemplo-body-splash", category: 2, price_cents: 3500, stock_quantity: 12,
+    image: { file: "body-splash", alt: "Ilustração de um frasco spray de body splash cítrico borrifando, com uma fatia de toranja" } },
   // Out of stock: shown, but can't be bought.
-  { name: "Base líquida (exemplo)", slug: "exemplo-base-liquida", category: 1, price_cents: 5900, stock_quantity: 0 },
+  { name: "Base líquida (exemplo)", slug: "exemplo-base-liquida", category: 1, price_cents: 5900, stock_quantity: 0,
+    image: { file: "base-liquida", alt: "Ilustração de um frasco de base líquida bege com tampa preta, uma amostra espalhada e uma esponja" } },
   // Price to be confirmed: shown, but can't be bought.
-  { name: "Shampoo nutritivo (exemplo)", slug: "exemplo-shampoo-nutritivo", category: 3, price_cents: null, stock_quantity: 5 },
+  { name: "Shampoo nutritivo (exemplo)", slug: "exemplo-shampoo-nutritivo", category: 3, price_cents: null, stock_quantity: 5,
+    image: { file: "shampoo-nutritivo", alt: "Ilustração de um frasco de shampoo cor de mel com tampa flip-top e bolhas de espuma" } },
   // Inactive: visible only in the panel.
-  { name: "Kit presente (exemplo)", slug: "exemplo-kit-presente", category: 4, price_cents: 7900, stock_quantity: 2, is_active: false },
+  { name: "Kit presente (exemplo)", slug: "exemplo-kit-presente", category: 4, price_cents: 7900, stock_quantity: 2, is_active: false,
+    image: { file: "kit-presente", alt: "Ilustração de uma caixa de presente com laço rosa, um cartão e um frasco de perfume" } },
 ];
 
 function minutesBefore(now: Date, minutes: number): string {
@@ -60,7 +72,7 @@ export function createSeedState(now: Date = new Date()): DemoState {
       stock_quantity: p.stock_quantity,
       is_active: p.is_active ?? true,
       is_featured: p.is_featured ?? false,
-      images: [],
+      images: [{ id: imageId(index + 1), url: `${DEMO_IMAGE_DIR}/${p.image.file}.webp`, alt: p.image.alt }],
       created_at: timestamp,
       updated_at: timestamp,
     };

@@ -13,9 +13,15 @@ export const DEMO_STATE_VERSION = 1;
 export const MAX_DEMO_IMAGES_PER_PRODUCT = 3;
 const MAX_ACTIVITY = 30;
 
+/** Folder in public/ with the illustrations of the initial products. */
+export const DEMO_IMAGE_DIR = "/demo/produtos";
+
 export type DemoImage = {
   id: string;
-  /** data:image/... URL (compressed in the browser before saving). */
+  /**
+   * data:image/... URL (compressed in the browser before saving), or one of
+   * the bundled illustrations under DEMO_IMAGE_DIR.
+   */
   url: string;
   alt: string;
 };
@@ -376,6 +382,13 @@ export function isDataImageUrl(value: unknown): value is string {
   return typeof value === "string" && DATA_IMAGE.test(value);
 }
 
+const BUNDLED_IMAGE = new RegExp(String.raw`^${DEMO_IMAGE_DIR}/[a-z0-9-]{1,60}\.webp$`);
+
+/** Uploaded photo or bundled illustration: the only URLs read from storage. */
+export function isDemoImageUrl(value: unknown): value is string {
+  return isDataImageUrl(value) || (typeof value === "string" && BUNDLED_IMAGE.test(value));
+}
+
 type Raw = Record<string, unknown>;
 
 const isObject = (value: unknown): value is Raw => typeof value === "object" && value !== null && !Array.isArray(value);
@@ -392,7 +405,7 @@ function parseCategory(raw: unknown): DemoCategory | null {
 }
 
 function parseImage(raw: unknown): DemoImage | null {
-  if (!isObject(raw) || !nonEmpty(raw.id) || !isDataImageUrl(raw.url)) return null;
+  if (!isObject(raw) || !nonEmpty(raw.id) || !isDemoImageUrl(raw.url)) return null;
   return { id: raw.id, url: raw.url, alt: str(raw.alt) ? raw.alt : "" };
 }
 

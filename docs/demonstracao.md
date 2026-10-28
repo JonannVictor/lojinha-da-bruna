@@ -131,7 +131,8 @@ local), apague a chave `lojinha-da-bruna:demo:v1`.
 ## Dados de exemplo
 
 Oito produtos **fictícios** (nome terminado em “(exemplo)”, marca “Marca
-fictícia”, sem fotos), as quatro categorias do briefing e três pedidos
+fictícia”, cada um com uma ilustração própria, sem marca, em
+`public/demo/produtos`), as quatro categorias do briefing e três pedidos
 `DEMO-001` a `DEMO-003` de “Cliente de demonstração”. Nenhum deles representa
 um produto, preço ou venda real da Bruna. Os exemplos cobrem os estados da
 loja: esgotado, preço a confirmar e inativo.

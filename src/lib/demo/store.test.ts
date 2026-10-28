@@ -133,12 +133,12 @@ describe("demo store", () => {
     };
 
     expect(await actions.uploadImage(id)(idle, photo())).toEqual({ status: "success", message: "Foto adicionada." });
-    const image = store.getSnapshot().state.products[0].images[0];
+    const image = store.getSnapshot().state.products[0].images.at(-1);
     expect(image).toMatchObject({ url: "data:image/png;base64,iVBORw==", alt: "Frasco" });
 
     storage.quota = 10;
     expect(await actions.uploadImage(id)(idle, photo())).toEqual({ status: "error", message: PHOTO_STORAGE_FULL_MESSAGE });
-    expect(store.getSnapshot().state.products[0].images).toHaveLength(1);
+    expect(store.getSnapshot().state.products[0].images).toHaveLength(2);
 
     const form = new FormData();
     form.set("photo", new Blob(["GIF89a"], { type: "image/gif" }), "x.gif");

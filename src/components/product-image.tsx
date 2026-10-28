@@ -5,6 +5,7 @@ import type { ProductImage as ProductImageType } from "@/lib/products/types";
 type Props = {
   image: ProductImageType | undefined;
   sizes: string;
+  /** Visible on load (likely the LCP): fetch right away, with high priority. */
   priority?: boolean;
 };
 
@@ -18,7 +19,8 @@ export function ProductImage({ image, sizes, priority }: Props) {
           alt={image.alt}
           fill
           sizes={sizes}
-          priority={priority}
+          loading={priority ? "eager" : undefined}
+          fetchPriority={priority ? "high" : undefined}
           className="object-cover"
         />
       ) : (

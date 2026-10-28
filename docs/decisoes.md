@@ -239,8 +239,11 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
 - Guardadas como `data:` URL (WebP/JPEG), após redução para 800 px e
   compressão progressiva até 200 KB (`lib/admin/prepare-image.ts`, também
   usada no envio ao Supabase com os limites antigos de 1600 px/4 MB). Máximo
-  de 3 por produto. Só URLs `data:image/(webp|jpeg|png)` são aceitas ao ler o
-  armazenamento.
+  de 3 por produto. Ao ler o armazenamento, só são aceitas URLs
+  `data:image/(webp|jpeg|png)` e as ilustrações dos produtos iniciais
+  (`/demo/produtos/<nome>.webp`, 1000 px, ~10 KB cada). Elas são desenhos
+  criados para a demonstração, não fotos de produtos reais, e passam pelo
+  otimizador de imagens do Next como qualquer arquivo de `public/`.
 - IndexedDB comportaria mais fotos, mas exigiria leitura assíncrona e URLs
   de objeto em cada render. Para uma demonstração, o `localStorage` com
   orçamento e mensagens claras foi considerado suficiente.

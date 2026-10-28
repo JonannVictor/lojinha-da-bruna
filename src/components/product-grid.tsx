@@ -3,12 +3,13 @@ import { ProductCard } from "./product-card";
 
 const gridClass = "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4";
 
-export function ProductGrid({ products }: { products: Product[] }) {
+/** `priorityCount`: how many leading photos are above the fold on load. */
+export function ProductGrid({ products, priorityCount = 0 }: { products: Product[]; priorityCount?: number }) {
   return (
     <ul className={gridClass}>
-      {products.map((product) => (
+      {products.map((product, index) => (
         <li key={product.id} className="flex">
-          <ProductCard product={product} />
+          <ProductCard product={product} priority={index < priorityCount} />
         </li>
       ))}
     </ul>

@@ -25,15 +25,17 @@ export function CatalogResults({
     <>
       <CategoryFilter categories={categories} active={activeCategory} query={query} />
 
-      <p className="mt-6 mb-4 text-sm text-muted" aria-live="polite">
+      {/* A heading, so the product names (h3) follow the page h1 in order. */}
+      <h2 className="mt-6 mb-4 text-sm font-normal text-muted" aria-live="polite">
         {query && <>Resultados para “{query}”. </>}
         {products.length === 1
           ? "1 produto encontrado."
           : `${products.length} produtos encontrados.`}
-      </p>
+      </h2>
 
       {products.length > 0 ? (
-        <ProductGrid products={products} />
+        // First row on desktop, first two rows on mobile.
+        <ProductGrid products={products} priorityCount={4} />
       ) : isFiltered ? (
         <EmptyState
           icon={<SearchX aria-hidden className="size-6" />}
