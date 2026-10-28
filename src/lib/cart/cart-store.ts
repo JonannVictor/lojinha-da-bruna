@@ -71,4 +71,8 @@ export const cart = {
   remove(productId: string) {
     write(removeItem(read(), productId));
   },
+  /** Empties the cart after the order is saved. */
+  clear() {
+    write(EMPTY);
+  },
 };

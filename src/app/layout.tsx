@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
-import { DemoBanner } from "@/components/demo-banner";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 import { storeConfig } from "@/config/store";
 import "./globals.css";
 
@@ -37,12 +34,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Pular para o conteúdo
         </a>
-        <DemoBanner />
-        <SiteHeader />
-        <main id="conteudo" className="flex-1">
-          {children}
-        </main>
-        <SiteFooter />
+        {/* Each area (store, admin) renders its own header and <main id="conteudo">. */}
+        {children}
       </body>
     </html>
   );

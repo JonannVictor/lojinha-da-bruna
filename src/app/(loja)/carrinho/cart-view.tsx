@@ -2,7 +2,7 @@
 
 import { AlertCircle, ShoppingBag, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { buttonStyles, ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { ProductImage } from "@/components/product-image";
@@ -13,16 +13,18 @@ import { formatPrice } from "@/lib/money";
 import { availabilityLabel, getAvailability } from "@/lib/products/availability";
 import type { Product } from "@/lib/products/types";
 import { getCartProducts } from "./actions";
+import { CheckoutForm } from "./checkout-form";
 
 type Fetched =
   | { key: string; status: "ok"; products: Product[] }
   | { key: string; status: "error" };
 
-export function CartView() {
+export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
   const lines = useCartLines();
   const idsKey = lines.map((l) => l.productId).sort().join(",");
   const [fetched, setFetched] = useState<Fetched | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const refetch = useCallback(() => setAttempt((n) => n + 1), []);
 
   useEffect(() => {
     if (!idsKey) return;
@@ -73,7 +75,7 @@ export function CartView() {
             <button
               type="button"
               className={buttonStyles.primary}
-              onClick={() => setAttempt((n) => n + 1)}
+              onClick={refetch}
             >
               Tentar novamente
             </button>
@@ -113,17 +115,32 @@ export function CartView() {
           O pedido é confirmado pela Bruna pelo WhatsApp, após a verificação
           da disponibilidade.
         </p>
-        <button
-          type="button"
-          disabled
-          aria-describedby="finalizar-em-breve"
-          className={`${buttonStyles.primary} mt-5 w-full`}
-        >
-          Finalizar pelo WhatsApp
-        </button>
-        <p id="finalizar-em-breve" className="mt-2 text-center text-xs text-muted">
-          A finalização do pedido estará disponível em breve.
-        </p>
+        {checkoutEnabled ? (
+          <CheckoutForm
+            lines={items
+              .filter((item) => item.purchasable)
+              .map((item) => ({
+                productId: item.line.productId,
+                quantity: Math.min(item.line.quantity, item.maxQuantity),
+              }))}
+            disabled={hasUnavailable || subtotalCents === 0}
+            onCartChanged={refetch}
+          />
+        ) : (
+          <>
+            <button
+              type="button"
+              disabled
+              aria-describedby="finalizar-em-breve"
+              className={`${buttonStyles.primary} mt-5 w-full`}
+            >
+              Finalizar pelo WhatsApp
+            </button>
+            <p id="finalizar-em-breve" className="mt-2 text-center text-xs text-muted">
+              A finalização do pedido estará disponível em breve.
+            </p>
+          </>
+        )}
         <Link
           href="/produtos"
           className="mt-4 block text-center text-sm font-medium text-accent hover:text-accent-hover"
