@@ -40,8 +40,9 @@ export function DemoPanelNotice() {
         <FlaskConical aria-hidden className="size-4 shrink-0" />
         {/* min-w pushes the button to its own line on phones. */}
         <p className="min-w-56 flex-1">
-          <strong className="font-semibold">Modo demonstração.</strong> Os dados são fictícios e ficam
-          armazenados apenas neste navegador. O painel não exige login: não use este modo para dados reais.
+          <strong className="font-semibold">Modo demonstração.</strong> Os dados são fictícios e as alterações
+          ficam armazenadas apenas neste navegador: outras pessoas e outros aparelhos continuam vendo os dados
+          iniciais. O painel não exige login: não use este modo para dados reais.
           {snapshot?.persistent && (
             <span className="text-warning/80">
               {" "}

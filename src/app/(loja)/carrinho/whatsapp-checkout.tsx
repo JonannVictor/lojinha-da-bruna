@@ -19,7 +19,7 @@ export function WhatsappCheckout({
   storeName: string;
   demo: boolean;
 }) {
-  const link = buildCartWhatsappLink(number, storeName, items);
+  const link = buildCartWhatsappLink(number, storeName, items, { demo });
 
   return (
     <div className="mt-5 space-y-3">
@@ -64,7 +64,7 @@ export function WhatsappCheckout({
             <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
             Demonstração: os produtos são fictícios, mas o link abre o WhatsApp
             real da loja. Envie a mensagem apenas em testes combinados com a
-            Bruna.
+            Bruna. A mensagem já começa identificada como teste.
           </p>
         )}
       </div>

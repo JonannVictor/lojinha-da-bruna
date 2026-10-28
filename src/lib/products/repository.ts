@@ -26,7 +26,7 @@ export type CatalogSource = "empty" | "demo" | "supabase";
 
 export function getCatalogSource(): CatalogSource {
   // Demo mode: the pages read the catalog kept in the browser and the server
-  // never touches Supabase (next.config.ts blocks it in production).
+  // never touches Supabase (see deployment.ts for where it may be built).
   if (isDemoMode()) return "demo";
   const requested = process.env.CATALOG_SOURCE;
   // Fictitious products must never reach the production store.

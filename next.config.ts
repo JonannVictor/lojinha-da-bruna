@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { assertDeploymentConfig } from "./src/lib/demo/deployment";
 
 // Product photos are served from the project's public Storage bucket. Only
 // that bucket path is allowed through the image optimizer.
@@ -20,13 +21,9 @@ function supabaseImagePattern() {
   }
 }
 
-// Demo mode keeps fictitious data in the browser and opens the panel without
-// login. It must never become the production store.
-if (process.env.NEXT_PUBLIC_DEMO_MODE === "true" && process.env.VERCEL_ENV === "production") {
-  throw new Error(
-    "NEXT_PUBLIC_DEMO_MODE=true não é permitido em produção. Use um deploy de Preview ou remova a variável.",
-  );
-}
+// Real store or demonstration: stops the build on an ambiguous combination,
+// and on the demonstration replacing a configured production store.
+assertDeploymentConfig(process.env);
 
 const nextConfig: NextConfig = {
   /* config options here */

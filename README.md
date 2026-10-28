@@ -16,7 +16,9 @@ echo NEXT_PUBLIC_DEMO_MODE=true >> .env.local
 npm run dev     # loja em http://localhost:3000, painel em /admin (sem login)
 ```
 
-Dados fictícios, salvos só no navegador. Não use em produção.
+Dados fictícios, salvos só no navegador. Para publicá-la no domínio principal
+da Vercel, veja a configuração explícita em
+[docs/demonstracao.md](docs/demonstracao.md#publicar-a-demonstração-na-vercel).
 
 ## Stack
 

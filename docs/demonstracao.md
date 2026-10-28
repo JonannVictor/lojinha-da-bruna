@@ -28,40 +28,77 @@ Com o modo ligado, o servidor nunca consulta o Supabase, mesmo que as
 variáveis dele estejam preenchidas.
 
 **WhatsApp na demonstração:** o botão "Finalizar pedido pelo WhatsApp" abre o
-WhatsApp **real** da loja (+55 54 8139-4629) com os produtos do carrinho. Como
-os produtos são fictícios, o carrinho avisa para enviar a mensagem apenas em
-testes combinados com a Bruna. Nada é enviado automaticamente: o cliente
-revisa e envia.
+WhatsApp **real** da loja (+55 54 8139-4629) com os produtos do carrinho. Por
+isso, na demonstração:
 
-**Proteção contra produção:** o build falha se `NEXT_PUBLIC_DEMO_MODE=true` e
-`VERCEL_ENV=production`. Para mostrar a demonstração pela Vercel, use um
-deploy de **Preview** (veja abaixo).
+- o carrinho avisa que os produtos são fictícios e pede para enviar a
+  mensagem apenas em testes combinados com a Bruna;
+- toda mensagem (carrinho e “Tirar dúvidas” na página do produto) começa com
+  `[DEMONSTRAÇÃO] Mensagem de teste: os produtos são fictícios e este não é um
+  pedido real.`, para que um envio por engano não pareça um pedido.
+
+Nada é enviado automaticamente: o visitante revisa e envia.
+
+## Loja real × demonstração
+
+O build decide entre dois modos, sempre de forma explícita
+(`src/lib/demo/deployment.ts`, chamado por `next.config.ts`):
+
+| Modo | Variáveis | Onde |
+| --- | --- | --- |
+| **Loja real** (padrão) | `NEXT_PUBLIC_DEMO_MODE` vazio ou `false`; Supabase configurado | Qualquer ambiente |
+| **Demonstração** | `NEXT_PUBLIC_DEMO_MODE=true` | Local e Preview |
+| **Demonstração pública** | `NEXT_PUBLIC_DEMO_MODE=true` **e** `ALLOW_DEMO_IN_PRODUCTION=true`, **sem** variáveis do Supabase | Production da Vercel (domínio principal) |
+
+O build é interrompido, com mensagem explicando o que mudar, quando:
+
+- `NEXT_PUBLIC_DEMO_MODE=true` chega à Production sem
+  `ALLOW_DEMO_IN_PRODUCTION=true` (proteção original, mantida);
+- a demonstração chega à Production com qualquer variável do Supabase
+  (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+  `SUPABASE_SECRET_KEY`): esse ambiente já é da loja real, e a demonstração
+  nunca o substitui;
+- `ALLOW_DEMO_IN_PRODUCTION=true` existe sem `NEXT_PUBLIC_DEMO_MODE=true`
+  (sobra de configuração);
+- alguma das duas variáveis tem valor diferente de `true`, `false` ou vazio
+  (ex.: `1`, `TRUE`).
 
 ## Publicar a demonstração na Vercel
 
-Neste projeto, todo push em `master` gera um deploy de **Produção**, que nunca
-pode usar o modo demonstração. Por isso:
+Neste projeto, todo push em `master` gera um deploy de **Production**, servido
+em `https://lojinha-da-bruna.vercel.app` (público, sem login da Vercel).
 
-1. Em *Settings → Environment Variables*, crie `NEXT_PUBLIC_DEMO_MODE=true`
-   marcando **somente Preview**. Se a variável também estiver marcada para
-   Production, todo deploy de `master` falha na proteção acima.
-2. Publique a demonstração a partir de outro branch (ex.: `demo`). O endereço
-   fixo desse branch é
-   `lojinha-da-bruna-git-demo-jonannvictors-projects.vercel.app`.
-3. A variável é fixada no build: depois de criá-la ou alterá-la, faça um novo
-   deploy (push no branch ou *Redeploy*). Um deploy feito antes da variável
-   continua sem o modo demonstração e mostra “Catálogo em preparação”.
-4. Os deploys de Preview exigem login na Vercel (*Deployment Protection*).
-   Para quem não tem conta abrir a demonstração, gere um link compartilhável
-   do endereço do branch (*Share* no deploy) ou desative a proteção para
-   Preview.
-5. Confira: a faixa amarela “Demonstração: …” aparece no topo e `/produtos`
-   lista os produtos “(exemplo)”.
+1. Em *Settings → Environment Variables*, no ambiente **Production**:
+   - `NEXT_PUBLIC_DEMO_MODE` = `true`;
+   - `ALLOW_DEMO_IN_PRODUCTION` = `true`;
+   - nenhuma variável do Supabase.
+2. As variáveis são lidas no build: depois de criá-las ou alterá-las, faça um
+   novo deploy (push em `master` ou *Redeploy*). Um deploy anterior continua
+   como estava; por exemplo, o que mostra “Catálogo em preparação”.
+3. Confira em `https://lojinha-da-bruna.vercel.app/produtos`, numa janela
+   anônima: a faixa amarela “Demonstração: …” aparece no topo e são listados
+   sete produtos “(exemplo)”.
+
+Preview continua podendo usar só `NEXT_PUBLIC_DEMO_MODE=true`, mas os deploys
+de Preview exigem login na Vercel (*Deployment Protection*).
+
+### Passar para a loja real
+
+1. Remova `NEXT_PUBLIC_DEMO_MODE` e `ALLOW_DEMO_IN_PRODUCTION` do ambiente
+   Production.
+2. Cadastre as variáveis do Supabase ([supabase.md](supabase.md)).
+3. Faça um novo deploy. Se uma variável da demonstração ficar para trás junto
+   com o Supabase, o build falha em vez de publicar a demonstração.
+
+Os dados salvos nos navegadores durante a demonstração ficam só neles: não
+vão para o Supabase.
 
 Os produtos de exemplo estão no código (`src/lib/demo/seed.ts`) e são
-carregados por qualquer navegador que abra a loja pela primeira vez; nada
-precisa ser cadastrado antes. Alterações feitas no painel ficam só no
-navegador de quem as fez.
+carregados por qualquer navegador que abra a loja pela primeira vez (inclusive
+com o armazenamento bloqueado); nada precisa ser cadastrado antes. Loja e
+painel leem os mesmos dados daquele navegador: o que a Bruna alterar no
+painel aparece na loja **para ela**, enquanto outros visitantes e outros
+aparelhos continuam vendo os dados iniciais.
 
 ## Como acessar
 

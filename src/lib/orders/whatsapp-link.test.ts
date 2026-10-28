@@ -5,7 +5,7 @@ import { summarizeCart } from "@/lib/cart/summary";
 import { setProductActive, storefrontProducts, updateProduct } from "@/lib/demo/model";
 import { createSeedState } from "@/lib/demo/seed";
 import type { Product } from "@/lib/products/types";
-import { buildCartWhatsappLink, buildProductWhatsappUrl } from "./whatsapp";
+import { buildCartWhatsappLink, buildProductWhatsappUrl, DEMO_MESSAGE_HEADER } from "./whatsapp";
 
 const NUMBER = "555481394629";
 const STORE = "Lojinha da Bruna";
@@ -80,6 +80,18 @@ describe("buildCartWhatsappLink", () => {
     expect(query).toBe(encodeURIComponent(result.message));
   });
 
+  it("identifies a demonstration cart as a test, never as a real order", () => {
+    const lines = [{ productId: colonia.id, quantity: 1 }];
+    const demo = buildCartWhatsappLink(NUMBER, STORE, summarizeCart(lines, products).items, { demo: true })!;
+    const text = decodedText(demo.url);
+    expect(text.split("\n")[0]).toBe(DEMO_MESSAGE_HEADER);
+    expect(DEMO_MESSAGE_HEADER).toMatch(/DEMONSTRAÇÃO.*fictícios.*não é um pedido real/);
+    // Same order details after the notice.
+    expect(text.endsWith(link(lines)!.message)).toBe(true);
+    // Real store: no notice.
+    expect(link(lines)!.message).not.toContain("DEMONSTRAÇÃO");
+  });
+
   it("is null for an empty cart or when every item is unavailable", () => {
     expect(link([])).toBeNull();
     expect(
@@ -128,6 +140,12 @@ describe("buildProductWhatsappUrl", () => {
     expect(text).toBe(
       "Olá, Bruna! Vi na Lojinha da Bruna o produto “Colônia floral (exemplo)” (Marca fictícia) e gostaria de mais informações.\nPreço no site: R$ 89,00.",
     );
+  });
+
+  it("starts with the demonstration notice in demo mode", () => {
+    const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, colonia, { demo: true }));
+    expect(text.split("\n")[0]).toBe(DEMO_MESSAGE_HEADER);
+    expect(text).toContain("o produto “Colônia floral (exemplo)”");
   });
 
   it("omits the price when it is pending and the brand when missing", () => {

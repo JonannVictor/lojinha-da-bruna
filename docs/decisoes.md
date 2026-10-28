@@ -182,8 +182,17 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
   exige sessão, e as páginas do painel renderizam as telas de
   `components/demo/` em vez das que chamam `requireAdmin()`. As Server
   Actions reais continuam exigindo administradora.
-- `next.config.ts` interrompe o build se o modo estiver ligado com
-  `VERCEL_ENV=production`.
+- `next.config.ts` chama `assertDeploymentConfig()`
+  (`src/lib/demo/deployment.ts`), que separa dois modos explícitos: loja real
+  (padrão) e demonstração. Com `VERCEL_ENV=production`, a demonstração só é
+  construída com `ALLOW_DEMO_IN_PRODUCTION=true` **e** sem nenhuma variável do
+  Supabase no ambiente: enquanto não existe loja real, o domínio principal
+  pode servir a demonstração; quando o Supabase for configurado em produção,
+  o build exige remover as variáveis da demonstração. Valores ambíguos
+  (`1`, `TRUE`, autorização sem o modo ligado) também interrompem o build.
+- Na demonstração, toda mensagem do WhatsApp começa com
+  `[DEMONSTRAÇÃO] Mensagem de teste…`, porque o link abre o número real da
+  loja.
 - Nenhum arquivo do Supabase (migrações, clientes, ações) foi removido.
 
 ## Dados no navegador

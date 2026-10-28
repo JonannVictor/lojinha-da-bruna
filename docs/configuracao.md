@@ -7,7 +7,8 @@
 | `NEXT_PUBLIC_SUPABASE_URL`             | Para o catálogo e o painel | Sim        | URL do projeto Supabase (`https://<ref>.supabase.co`).                                                                     |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Para o catálogo e o painel | Sim        | Chave publicável (`sb_publishable_…`). O acesso é limitado pelo RLS.                                                       |
 | `SUPABASE_SECRET_KEY`                  | Para pedidos     | **Não**              | Chave secreta (`sb_secret_…`). Usada apenas no servidor, para executar `create_order`. Nunca use prefixo `NEXT_PUBLIC_`. |
-| `NEXT_PUBLIC_DEMO_MODE`                | Não              | Sim                  | `true`: modo demonstração (dados no navegador, painel sem login, sem Supabase). Bloqueado em produção. Ver [demonstracao.md](demonstracao.md). |
+| `NEXT_PUBLIC_DEMO_MODE`                | Não              | Sim                  | `true`: modo demonstração (dados no navegador, painel sem login, sem Supabase). Vazio ou `false`: loja real. Outros valores interrompem o build. Ver [demonstracao.md](demonstracao.md). |
+| `ALLOW_DEMO_IN_PRODUCTION`             | Não              | Não                  | `true`: autoriza a demonstração no ambiente Production da Vercel (domínio principal), somente se esse ambiente não tiver variáveis do Supabase. Exige `NEXT_PUBLIC_DEMO_MODE=true`. Ver [demonstracao.md](demonstracao.md). |
 | `CATALOG_SOURCE`                       | Não              | Não                  | Vazio: Supabase, se configurado; senão, catálogo vazio. `demo`: produtos fictícios (ignorado em produção). `empty`: força o catálogo vazio. |
 | `WHATSAPP_NUMBER`                      | Não              | Não                  | Substitui o número oficial (definido em `src/config/store.ts`) neste ambiente, ex.: um número de teste. Só dígitos, com DDI 55 e DDD. Vazio ou inválido: usa o oficial. |
 

@@ -16,10 +16,13 @@ export function ProductDetailView({
   product,
   whatsappNumber,
   storeName,
+  demo = false,
 }: {
   product: Product;
   whatsappNumber: string;
   storeName: string;
+  /** Marks the WhatsApp message as a demonstration test. */
+  demo?: boolean;
 }) {
   const [mainImage, ...otherImages] = product.images;
 
@@ -84,7 +87,7 @@ export function ProductDetailView({
         </div>
 
         <a
-          href={buildProductWhatsappUrl(whatsappNumber, storeName, product)}
+          href={buildProductWhatsappUrl(whatsappNumber, storeName, product, { demo })}
           target="_blank"
           rel="noopener noreferrer"
           className={`${buttonStyles.secondary} mt-3`}
