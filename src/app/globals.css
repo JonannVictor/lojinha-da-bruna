@@ -1,26 +1,55 @@
 @import "tailwindcss";
 
+/*
+ * Visual identity tokens. The direction is provisional: change the values
+ * here (not in components) to adjust colors and typography store-wide.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbf8f5;
+  --surface: #ffffff;
+  --surface-muted: #f4eee9;
+  --foreground: #2b2522;
+  --muted: #6b615c;
+  --border: #e9e0d8;
+  --accent: #a3485d;
+  --accent-hover: #8a3a4d;
+  --accent-soft: #f7e9ec;
+  --accent-foreground: #ffffff;
+  --success: #2e6a4e;
+  --success-soft: #e6f2ec;
+  --warning: #85570f;
+  --warning-soft: #fbf1df;
+  --danger: #a1352f;
+  --danger-soft: #fbe9e7;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-heading);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
