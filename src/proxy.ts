@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isDemoMode } from "@/lib/demo/mode";
 import { readSupabaseConfig } from "@/lib/supabase/config";
 
 // Runs before every /admin request: refreshes the Supabase session cookies
@@ -8,6 +9,10 @@ import { readSupabaseConfig } from "@/lib/supabase/config";
 // and RLS enforces the same rules in the database.
 
 export async function proxy(request: NextRequest) {
+  // Demo mode has no login: the panel only edits data in the visitor's own
+  // browser, and the real Server Actions still call requireAdmin().
+  if (isDemoMode()) return NextResponse.next({ request });
+
   const config = readSupabaseConfig();
   // Without Supabase the admin pages render a "not configured" notice.
   if (!config) return NextResponse.next({ request });

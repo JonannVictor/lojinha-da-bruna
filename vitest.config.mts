@@ -10,7 +10,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ["src/**/*.test.ts", "supabase/tests/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "supabase/tests/**/*.test.ts"],
     // Booting the in-process Postgres for the database tests takes a moment.
     hookTimeout: 60_000,
   },

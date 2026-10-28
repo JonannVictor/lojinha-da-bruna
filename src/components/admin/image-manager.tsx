@@ -2,9 +2,18 @@
 
 import { ImagePlus, LoaderCircle, Star, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { startTransition, useActionState, useState, type FormEvent } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 import { buttonStyles } from "@/components/button-link";
 import { idleState, type ActionState } from "@/lib/admin/action-state";
+import { ACCEPTED_IMAGE_TYPES, prepareImage, type ImageLimits } from "@/lib/admin/prepare-image";
 import { MAX_IMAGES_PER_PRODUCT } from "@/lib/products/images";
 import { ActionButton } from "./action-button";
 import { Field, FormMessage, inputClass } from "./form-controls";
@@ -16,47 +25,38 @@ type Props = {
   upload: Action;
   remove: Record<string, Action>;
   makeMain: Record<string, Action>;
+  /** Smaller limits for the demo, where photos are kept in the browser. */
+  limits?: ImageLimits & { maxImages: number };
+  note?: ReactNode;
 };
 
-const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
+// Supabase uploads: under the server limit (MAX_IMAGE_BYTES) and Vercel's
+// 4.5 MB request body limit.
+const DEFAULT_LIMITS: ImageLimits & { maxImages: number } = {
+  maxDimension: 1600,
+  maxBytes: 4 * 1024 * 1024,
+  maxImages: MAX_IMAGES_PER_PRODUCT,
+};
 const MAX_SOURCE_BYTES = 25 * 1024 * 1024;
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // same as the server (MAX_IMAGE_BYTES)
-const MAX_DIMENSION = 1600;
 
-/**
- * Downscales large photos in the browser (phone pictures are often 4–10 MB)
- * and re-encodes them as WebP, falling back to JPEG. The server validates the
- * result again; this step is only for speed and for the upload size limit.
- */
-async function prepareImage(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
-  if (scale === 1 && file.size <= MAX_UPLOAD_BYTES) {
-    bitmap.close();
-    return file;
-  }
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-
-  const encode = (type: string) =>
-    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, 0.85));
-  const webp = await encode("image/webp");
-  // Browsers without a WebP encoder silently return PNG.
-  if (webp && webp.type === "image/webp") return webp;
-  const jpeg = await encode("image/jpeg");
-  if (!jpeg) throw new Error("encode");
-  return jpeg;
-}
-
-export function ImageManager({ images, upload, remove, makeMain }: Props) {
+export function ImageManager({ images, upload, remove, makeMain, limits = DEFAULT_LIMITS, note }: Props) {
   const [state, dispatch, pending] = useActionState(upload, idleState);
   const [clientError, setClientError] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
   const busy = pending || preparing;
-  const full = images.length >= MAX_IMAGES_PER_PRODUCT;
+  const full = images.length >= limits.maxImages;
+
+  // Object URLs keep the file in memory until revoked.
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  function onFileChange(event: ChangeEvent<HTMLInputElement>) {
+    setClientError(null);
+    const file = event.target.files?.[0];
+    setPreview(file && ACCEPTED_IMAGE_TYPES.includes(file.type) ? URL.createObjectURL(file) : null);
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,25 +64,30 @@ export function ImageManager({ images, upload, remove, makeMain }: Props) {
     const form = event.currentTarget;
     const file = (form.elements.namedItem("photo") as HTMLInputElement).files?.[0];
     if (!file) return setClientError("Selecione uma foto.");
-    if (!ACCEPTED.includes(file.type)) return setClientError("Formato não suportado. Envie JPG, PNG ou WebP.");
+    if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) return setClientError("Formato não suportado. Envie JPG, PNG ou WebP.");
     if (file.size > MAX_SOURCE_BYTES) return setClientError("Arquivo grande demais (máximo 25 MB antes do ajuste).");
 
     setPreparing(true);
     let blob: Blob;
     try {
-      blob = await prepareImage(file);
+      blob = await prepareImage(file, limits);
     } catch {
       setPreparing(false);
       return setClientError("Não foi possível ler esta imagem. Tente outra foto em JPG, PNG ou WebP.");
     }
     setPreparing(false);
-    if (blob.size > MAX_UPLOAD_BYTES) return setClientError("A foto continua grande demais depois do ajuste.");
+    if (blob.size > limits.maxBytes) {
+      return setClientError(
+        "A foto continua grande demais depois da compressão. Tente uma foto menor ou recortada, ou mantenha o produto sem foto por enquanto.",
+      );
+    }
 
     const formData = new FormData();
     formData.set("photo", blob, "foto");
     formData.set("alt", String(new FormData(form).get("alt") ?? ""));
     startTransition(() => dispatch(formData));
     form.reset();
+    setPreview(null);
   }
 
   return (
@@ -92,13 +97,14 @@ export function ImageManager({ images, upload, remove, makeMain }: Props) {
           Fotos
         </h2>
         <p className="mt-1 text-sm text-muted">
-          A primeira foto é a principal. Até {MAX_IMAGES_PER_PRODUCT} fotos em JPG, PNG ou WebP. Sem fotos, a
+          A primeira foto é a principal. Até {limits.maxImages} fotos em JPG, PNG ou WebP. Sem fotos, a
           loja mostra “Foto em breve”.
         </p>
+        {note}
       </div>
 
       {images.length > 0 && (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <ul className="grid grid-cols-3 gap-3">
           {images.map((image, index) => (
             <li key={image.path} className="overflow-hidden rounded-xl border border-border">
               <div className="relative aspect-square bg-surface-muted">
@@ -132,14 +138,16 @@ export function ImageManager({ images, upload, remove, makeMain }: Props) {
       {full ? (
         <p className="text-sm text-muted">Limite de fotos atingido. Remova uma para adicionar outra.</p>
       ) : (
-        <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+        // Stacked: the manager lives in a narrow side column on the edit page.
+        <form onSubmit={onSubmit} className="grid gap-3">
           <Field id="photo" label="Nova foto">
             <input
               id="photo"
               name="photo"
               type="file"
-              accept={ACCEPTED.join(",")}
+              accept={ACCEPTED_IMAGE_TYPES.join(",")}
               required
+              onChange={onFileChange}
               className="block w-full text-sm file:mr-3 file:rounded-full file:border-0 file:bg-accent-soft file:px-4 file:py-2 file:text-sm file:font-semibold file:text-accent"
             />
           </Field>
@@ -150,6 +158,16 @@ export function ImageManager({ images, upload, remove, makeMain }: Props) {
             {busy ? <LoaderCircle aria-hidden className="size-4 animate-spin" /> : <ImagePlus aria-hidden className="size-4" />}
             {preparing ? "Preparando…" : pending ? "Enviando…" : "Enviar foto"}
           </button>
+          {preview && (
+            <figure>
+              <div className="relative size-32 overflow-hidden rounded-xl border border-border bg-surface-muted">
+                <Image src={preview} alt="Pré-visualização da foto selecionada" fill unoptimized className="object-cover" />
+              </div>
+              <figcaption className="mt-1 text-xs text-muted">
+                Pré-visualização. A foto será reduzida e comprimida antes de salvar.
+              </figcaption>
+            </figure>
+          )}
         </form>
       )}
 

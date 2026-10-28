@@ -7,7 +7,7 @@ const { getCatalogSource, getProductsByIds, listProducts } = await import("./rep
 afterEach(() => vi.unstubAllEnvs());
 
 function env(values: Record<string, string>) {
-  for (const key of ["CATALOG_SOURCE", "VERCEL_ENV", "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"]) {
+  for (const key of ["NEXT_PUBLIC_DEMO_MODE", "CATALOG_SOURCE", "VERCEL_ENV", "NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"]) {
     vi.stubEnv(key, values[key] ?? "");
   }
 }
@@ -37,6 +37,13 @@ describe("getCatalogSource", () => {
     expect(getCatalogSource()).toBe("supabase");
     env({ CATALOG_SOURCE: "demo", VERCEL_ENV: "preview", ...supabase });
     expect(getCatalogSource()).toBe("demo");
+  });
+
+  it("demo mode never reads Supabase, even when it is configured", () => {
+    env({ NEXT_PUBLIC_DEMO_MODE: "true", ...supabase });
+    expect(getCatalogSource()).toBe("demo");
+    env({ NEXT_PUBLIC_DEMO_MODE: "false", ...supabase });
+    expect(getCatalogSource()).toBe("supabase");
   });
 
   it("can be forced empty", () => {

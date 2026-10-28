@@ -1,10 +1,12 @@
-import { AlertCircle, Settings } from "lucide-react";
+import { AlertCircle, FlaskConical, Settings } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import { ButtonLink } from "@/components/button-link";
 import { storeConfig } from "@/config/store";
 import { getSessionStatus, safeAdminRedirect } from "@/lib/auth/admin";
+import { isDemoMode } from "@/lib/demo/mode";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
@@ -31,6 +33,20 @@ export default function LoginPage({ searchParams }: PageProps<"/admin/login">) {
 }
 
 async function LoginContent({ searchParams }: Pick<PageProps<"/admin/login">, "searchParams">) {
+  if (isDemoMode()) {
+    return (
+      <div className="mt-4 space-y-4">
+        <p className="flex gap-3 rounded-xl bg-warning-soft p-4 text-sm text-warning">
+          <FlaskConical aria-hidden className="mt-0.5 size-4 shrink-0" />
+          Modo demonstração: o painel abre sem login e usa apenas dados fictícios salvos neste navegador.
+        </p>
+        <ButtonLink href="/admin" className="w-full">
+          Abrir painel de demonstração
+        </ButtonLink>
+      </div>
+    );
+  }
+
   const params = await searchParams;
   const next = safeAdminRedirect(Array.isArray(params.next) ? params.next[0] : params.next);
   const state = await getSessionStatus();

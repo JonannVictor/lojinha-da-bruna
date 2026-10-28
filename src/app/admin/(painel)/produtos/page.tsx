@@ -1,16 +1,15 @@
-import { ImageOff, PackageOpen, Pencil, Plus, Search, SearchX } from "lucide-react";
+import { PackageOpen, Plus, Search, SearchX } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { Suspense } from "react";
-import { ActionButton } from "@/components/admin/action-button";
 import { inputClass } from "@/components/admin/form-controls";
 import { AdminPageHeader, AdminSkeleton, Notice } from "@/components/admin/page-header";
+import { ProductRow } from "@/components/admin/product-row";
 import { ButtonLink } from "@/components/button-link";
+import { DemoProductList } from "@/components/demo/admin-products";
 import { EmptyState } from "@/components/empty-state";
-import { listAdminProducts, type AdminProduct, type ProductStatusFilter } from "@/lib/admin/catalog";
+import { listAdminProducts, type ProductStatusFilter } from "@/lib/admin/catalog";
 import { requireAdmin } from "@/lib/auth/admin";
-import { formatPrice } from "@/lib/money";
+import { isDemoMode } from "@/lib/demo/mode";
 import { publicImageUrl } from "@/lib/products/images";
 import { requireSupabaseConfig } from "@/lib/supabase/config";
 import { toggleProductActive } from "./actions";
@@ -42,9 +41,20 @@ export default function AdminProductsPage({ searchParams }: PageProps<"/admin/pr
         }
       />
       <Suspense fallback={<AdminSkeleton label="Carregando produtos…" />}>
-        <ProductList searchParams={searchParams} />
+        {isDemoMode() ? <DemoProducts searchParams={searchParams} /> : <ProductList searchParams={searchParams} />}
       </Suspense>
     </>
+  );
+}
+
+async function DemoProducts({ searchParams }: Pick<PageProps<"/admin/produtos">, "searchParams">) {
+  const params = await searchParams;
+  return (
+    <DemoProductList
+      initialQuery={first(params.q).slice(0, 100)}
+      initialStatus={first(params.status)}
+      deleted={params.excluido === "1"}
+    />
   );
 }
 
@@ -114,62 +124,15 @@ async function ProductList({ searchParams }: Pick<PageProps<"/admin/produtos">, 
       ) : (
         <ul className="divide-y divide-border rounded-2xl border border-border bg-surface">
           {products.map((product) => (
-            <ProductRow key={product.id} product={product} supabaseUrl={url} />
+            <ProductRow
+              key={product.id}
+              product={product}
+              imageUrl={product.images[0] ? publicImageUrl(url, product.images[0].path) : null}
+              toggle={toggleProductActive.bind(null, product.id, !product.is_active)}
+            />
           ))}
         </ul>
       )}
     </>
-  );
-}
-
-function ProductRow({ product, supabaseUrl }: { product: AdminProduct; supabaseUrl: string }) {
-  const photo = product.images[0];
-  return (
-    <li className="flex flex-wrap items-center gap-3 p-3 sm:flex-nowrap sm:gap-4 sm:p-4">
-      <div className="relative size-14 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-muted">
-        {photo ? (
-          <Image src={publicImageUrl(supabaseUrl, photo.path)} alt="" fill sizes="56px" className="object-cover" />
-        ) : (
-          <ImageOff aria-hidden className="absolute inset-0 m-auto size-5 text-muted opacity-60" />
-        )}
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <Link href={`/admin/produtos/${product.id}`} className="font-medium hover:text-accent">
-          {product.name}
-        </Link>
-        <p className="truncate text-xs text-muted">
-          {[product.brand, product.category_name ?? "Sem categoria"].filter(Boolean).join(" · ")}
-        </p>
-        <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-          <span className={product.price_cents === null ? "text-warning" : ""}>
-            {product.price_cents === null ? "Preço a confirmar" : formatPrice(product.price_cents)}
-          </span>
-          <span className="text-muted">
-            {product.stock_quantity === null ? "Estoque não controlado" : `Estoque: ${product.stock_quantity}`}
-          </span>
-        </p>
-      </div>
-
-      <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            product.is_active ? "bg-success-soft text-success" : "bg-surface-muted text-muted"
-          }`}
-        >
-          {product.is_active ? "Ativo" : "Inativo"}
-        </span>
-        <ActionButton action={toggleProductActive.bind(null, product.id, !product.is_active)}>
-          {product.is_active ? "Desativar" : "Ativar"}
-        </ActionButton>
-        <Link
-          href={`/admin/produtos/${product.id}`}
-          aria-label={`Editar ${product.name}`}
-          className="inline-flex size-8 items-center justify-center rounded-full border border-border hover:border-accent hover:text-accent"
-        >
-          <Pencil aria-hidden className="size-3.5" />
-        </Link>
-      </div>
-    </li>
   );
 }

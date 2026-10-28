@@ -80,7 +80,7 @@ export function CheckoutForm({
         className={`${buttonStyles.primary} w-full`}
       >
         {pending && <LoaderCircle aria-hidden className="size-4 animate-spin" />}
-        {pending ? "Registrando pedido…" : "Finalizar pelo WhatsApp"}
+        {pending ? "Registrando pedido…" : "Finalizar pedido pelo WhatsApp"}
       </button>
     </form>
   );

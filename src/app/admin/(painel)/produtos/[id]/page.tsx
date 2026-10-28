@@ -7,9 +7,11 @@ import { ActionButton } from "@/components/admin/action-button";
 import { ImageManager } from "@/components/admin/image-manager";
 import { AdminPageHeader, AdminSkeleton, Notice } from "@/components/admin/page-header";
 import { ProductForm } from "@/components/admin/product-form";
+import { DemoProductEditor } from "@/components/demo/admin-products";
 import { getAdminProduct, listAdminCategories } from "@/lib/admin/catalog";
 import { isUuid } from "@/lib/admin/validation";
 import { requireAdmin } from "@/lib/auth/admin";
+import { isDemoMode } from "@/lib/demo/mode";
 import { publicImageUrl } from "@/lib/products/images";
 import { requireSupabaseConfig } from "@/lib/supabase/config";
 import {
@@ -33,10 +35,19 @@ export default function EditProductPage({ params, searchParams }: PageProps<"/ad
         Produtos
       </Link>
       <Suspense fallback={<AdminSkeleton rows={5} label="Carregando produto…" />}>
-        <EditProduct params={params} searchParams={searchParams} />
+        {isDemoMode() ? (
+          <DemoEditProduct params={params} searchParams={searchParams} />
+        ) : (
+          <EditProduct params={params} searchParams={searchParams} />
+        )}
       </Suspense>
     </>
   );
+}
+
+async function DemoEditProduct({ params, searchParams }: PageProps<"/admin/produtos/[id]">) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  return <DemoProductEditor id={id} created={query.criado === "1"} />;
 }
 
 async function EditProduct({ params, searchParams }: PageProps<"/admin/produtos/[id]">) {

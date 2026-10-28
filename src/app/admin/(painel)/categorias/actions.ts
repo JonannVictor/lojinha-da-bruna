@@ -2,6 +2,7 @@
 
 import { refresh, updateTag } from "next/cache";
 import { failure, success, type ActionState } from "@/lib/admin/action-state";
+import { categoryMutationError as mutationError } from "@/lib/admin/mutation-messages";
 import {
   createCategory,
   deleteCategory,
@@ -20,21 +21,6 @@ function storefrontChanged() {
   // Product pages embed the category name.
   updateTag("products");
   refresh();
-}
-
-function mutationError(result: Exclude<MutationResult, { ok: true }>): ActionState {
-  switch (result.reason) {
-    case "slug_taken":
-      return failure("Já existe uma categoria com esse nome ou endereço.", {
-        slug: "Escolha outro endereço (slug).",
-      });
-    case "not_found":
-      return failure("Categoria não encontrada.");
-    case "has_products":
-      return failure("Esta categoria tem produtos. Mova-os para outra categoria ou desative-a.");
-    default:
-      return failure("Os dados foram recusados. Confira os campos e tente novamente.");
-  }
 }
 
 async function run(action: () => Promise<MutationResult>, message: string): Promise<ActionState> {

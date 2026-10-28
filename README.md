@@ -3,8 +3,20 @@
 Loja multimarcas (beleza, perfumaria, cuidados pessoais e variedades) com
 carrinho e finalização do pedido pelo WhatsApp. Desenvolvida pela Hineni Agency.
 
-**Etapa atual:** 2 — Supabase e painel administrativo (`/admin`).
+**Etapa atual:** 3 — demonstração visual funcional, sem Supabase
+([docs/demonstracao.md](docs/demonstracao.md)).
+Etapa 2: Supabase e painel administrativo (`/admin`).
 Etapa 1: vitrine (início, catálogo, produto e carrinho).
+
+## Demonstração rápida (sem Supabase)
+
+```bash
+npm install
+echo NEXT_PUBLIC_DEMO_MODE=true >> .env.local
+npm run dev     # loja em http://localhost:3000, painel em /admin (sem login)
+```
+
+Dados fictícios, salvos só no navegador. Não use em produção.
 
 ## Stack
 
@@ -51,6 +63,8 @@ src/
   components/          componentes da loja; components/admin/ para o painel
   config/store.ts      informações comerciais configuráveis
   lib/products/        tipos, regras de disponibilidade, busca e repositório
+  lib/demo/            modo demonstração: modelo, localStorage e repositório local
+  components/demo/     telas da loja e do painel no modo demonstração
   lib/cart/            regras do carrinho e persistência no navegador
   lib/admin/           validação e operações do painel (catálogo e fotos)
   lib/auth/admin.ts    verificação de administradora (toda página e ação)
@@ -63,4 +77,5 @@ docs/
   decisoes.md          decisões de arquitetura
   configuracao.md      variáveis de ambiente e pendências do proprietário
   supabase.md          configuração do Supabase, administradoras e segurança
+  demonstracao.md      modo demonstração: ativação, painel, restauração e limites
 ```

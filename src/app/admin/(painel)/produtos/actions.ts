@@ -3,12 +3,12 @@
 import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { failure, success, type ActionState } from "@/lib/admin/action-state";
+import { productMutationError as mutationError } from "@/lib/admin/mutation-messages";
 import {
   createProduct,
   deleteProduct,
   setProductActive,
   updateProduct,
-  type MutationResult,
 } from "@/lib/admin/catalog";
 import {
   addProductImage,
@@ -28,19 +28,6 @@ const GENERIC_ERROR = "Não foi possível concluir a operação. Tente novamente
 function storefrontChanged() {
   updateTag("products");
   refresh();
-}
-
-function mutationError(result: Exclude<MutationResult<unknown>, { ok: true }>): ActionState {
-  switch (result.reason) {
-    case "slug_taken":
-      return failure("Já existe um produto com esse endereço.", { slug: "Escolha outro endereço (slug)." });
-    case "not_found":
-      return failure("Produto não encontrado. Ele pode ter sido excluído.");
-    case "has_orders":
-      return failure("Este produto já aparece em pedidos e não pode ser excluído. Desative-o.");
-    default:
-      return failure("Os dados foram recusados. Confira os campos e tente novamente.");
-  }
 }
 
 async function guarded(run: () => Promise<ActionState>): Promise<ActionState> {

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cacheLife, cacheTag } from "next/cache";
+import { isDemoMode } from "@/lib/demo/mode";
 import { readSupabaseConfig } from "@/lib/supabase/config";
 import { createPublicClient } from "@/lib/supabase/public-client";
 import { initialCategories } from "./categories";
@@ -24,6 +25,9 @@ import type { Category, Product, ProductFilters } from "./types";
 export type CatalogSource = "empty" | "demo" | "supabase";
 
 export function getCatalogSource(): CatalogSource {
+  // Demo mode: the pages read the catalog kept in the browser and the server
+  // never touches Supabase (next.config.ts blocks it in production).
+  if (isDemoMode()) return "demo";
   const requested = process.env.CATALOG_SOURCE;
   // Fictitious products must never reach the production store.
   if (requested === "demo" && process.env.VERCEL_ENV !== "production") return "demo";

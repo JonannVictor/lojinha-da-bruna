@@ -3,9 +3,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CategoryForm, CategoryRow } from "@/components/admin/category-editor";
 import { AdminPageHeader, AdminSkeleton } from "@/components/admin/page-header";
+import { DemoCategoryManager } from "@/components/demo/admin-categories";
 import { EmptyState } from "@/components/empty-state";
 import { listAdminCategories } from "@/lib/admin/catalog";
 import { requireAdmin } from "@/lib/auth/admin";
+import { isDemoMode } from "@/lib/demo/mode";
 import {
   moveCategoryAction,
   removeCategory,
@@ -24,9 +26,13 @@ export default function AdminCategoriesPage() {
         title="Categorias"
         description="A ordem abaixo é a ordem em que as categorias aparecem na loja. Categorias inativas ficam ocultas."
       />
-      <Suspense fallback={<AdminSkeleton label="Carregando categorias…" />}>
-        <Categories />
-      </Suspense>
+      {isDemoMode() ? (
+        <DemoCategoryManager />
+      ) : (
+        <Suspense fallback={<AdminSkeleton label="Carregando categorias…" />}>
+          <Categories />
+        </Suspense>
+      )}
     </>
   );
 }

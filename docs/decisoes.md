@@ -167,3 +167,76 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
   devolução no cancelamento) entra junto com a gestão de pedidos.
 - Enquanto `WHATSAPP_NUMBER` estiver vazio, a finalização segue desligada na
   interface **e** recusada no servidor.
+
+---
+
+# Decisões de arquitetura — Etapa 3 (modo demonstração)
+
+## Ativação e isolamento
+
+- `NEXT_PUBLIC_DEMO_MODE=true` (`src/lib/demo/mode.ts`). Por ser
+  `NEXT_PUBLIC_`, o valor é fixado no build e igual no servidor e no
+  navegador, o que evita divergência na hidratação.
+- Com o modo ligado, `getCatalogSource()` devolve `demo`: o servidor não
+  consulta o Supabase e `isCheckoutEnabled()` fica falso. O `proxy.ts` não
+  exige sessão, e as páginas do painel renderizam as telas de
+  `components/demo/` em vez das que chamam `requireAdmin()`. As Server
+  Actions reais continuam exigindo administradora.
+- `next.config.ts` interrompe o build se o modo estiver ligado com
+  `VERCEL_ENV=production`.
+- Nenhum arquivo do Supabase (migrações, clientes, ações) foi removido.
+
+## Dados no navegador
+
+- `src/lib/demo/model.ts`: estado e regras **puras** (criar, editar,
+  ativar, excluir, fotos, categorias, status de pedidos) e as "visões" lidas
+  pela loja (`storefrontProducts`) e pelo painel (`adminProducts`,
+  `summarize`). As regras repetem as do banco: slug único, produto com pedido
+  não é excluído, categoria com produtos não é excluída, categoria inativa
+  esconde o rótulo, produto inativo some da loja.
+- `src/lib/demo/storage.ts`: leitura e gravação em uma única chave
+  (`lojinha-da-bruna:demo:v1`), com orçamento de 4 milhões de caracteres,
+  detecção de cota esgotada, armazenamento bloqueado e JSON inválido (cópia em
+  `…:corrompido` e volta aos dados iniciais). A gravação é feita antes de
+  atualizar a tela: se o navegador recusar, nada muda.
+- `src/lib/demo/store.ts`: ponto único de acesso. `useDemoSnapshot()`
+  (`useSyncExternalStore`, snapshot do servidor `null`) é lido pela loja e
+  pelo painel, então os dois mostram sempre o mesmo estado; o evento
+  `storage` sincroniza abas. O `localStorage` nunca é lido no servidor, e o
+  primeiro render do cliente mostra o mesmo esqueleto do HTML do servidor.
+- `CatalogRepository` (assíncrono) é a interface de escrita. Uma
+  implementação via Server Actions/Supabase pode substituí-la sem alterar os
+  componentes.
+- `src/lib/demo/admin-actions.ts` adapta o repositório à assinatura das
+  Server Actions (`(state, formData) => ActionState`), com a mesma validação
+  (`parseProductForm`) e as mesmas mensagens (`lib/admin/mutation-messages.ts`).
+  Assim `ProductForm`, `CategoryForm`, `ImageManager`, `ActionButton` e
+  `ProductRow` são os mesmos nos dois modos.
+- Ids gerados com `crypto.randomUUID`, com alternativa via
+  `getRandomValues` para acesso por HTTP na rede local (contexto não seguro).
+
+## Vitrine
+
+- As partes visuais foram extraídas para componentes compartilhados
+  (`catalog-results.tsx`, `product-detail.tsx`, `home-sections.tsx`); as
+  páginas escolhem a origem (servidor ou navegador). URLs inalteradas.
+- O carrinho foi dividido em `CartContents` (apresentação) com duas fontes:
+  `CartView` (server action) e `DemoCartView` (catálogo local). Na
+  demonstração, o botão de finalizar fica desativado com aviso explícito.
+
+## Fotos
+
+- Guardadas como `data:` URL (WebP/JPEG), após redução para 800 px e
+  compressão progressiva até 200 KB (`lib/admin/prepare-image.ts`, também
+  usada no envio ao Supabase com os limites antigos de 1600 px/4 MB). Máximo
+  de 3 por produto. Só URLs `data:image/(webp|jpeg|png)` são aceitas ao ler o
+  armazenamento.
+- IndexedDB comportaria mais fotos, mas exigiria leitura assíncrona e URLs
+  de objeto em cada render. Para uma demonstração, o `localStorage` com
+  orçamento e mensagens claras foi considerado suficiente.
+
+## Pedidos de demonstração
+
+- Apenas os três pedidos iniciais, fictícios. O carrinho não cria pedidos na
+  demonstração, para não simular uma venda ou uma integração com WhatsApp.
+- `/admin/pedidos` só existe no modo demonstração (404 fora dele).

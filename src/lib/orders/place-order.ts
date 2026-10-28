@@ -8,17 +8,13 @@ import { createServiceClient } from "@/lib/supabase/service-client";
 import type { CheckoutInput } from "./checkout";
 import { buildOrderMessage, buildWhatsappUrl, type SavedOrder } from "./whatsapp";
 
-// Order creation. The checkout is only enabled when everything it depends on
-// exists: the Supabase catalog, the server secret key and Bruna's WhatsApp
-// number. While WHATSAPP_NUMBER is empty (still unconfirmed) the cart keeps
-// the button disabled and this function refuses to persist anything.
+// Order creation. Saving the order before opening WhatsApp is only possible
+// when the Supabase catalog and the server secret key exist. Otherwise (no
+// Supabase yet, or demo mode) the cart opens WhatsApp directly with the cart
+// contents (buildCartWhatsappLink) and nothing is persisted by the site.
 
 export function isCheckoutEnabled(): boolean {
-  return (
-    storeConfig.whatsappNumber !== null &&
-    getCatalogSource() === "supabase" &&
-    Boolean(process.env.SUPABASE_SECRET_KEY?.trim())
-  );
+  return getCatalogSource() === "supabase" && Boolean(process.env.SUPABASE_SECRET_KEY?.trim());
 }
 
 export type PlaceOrderResult =

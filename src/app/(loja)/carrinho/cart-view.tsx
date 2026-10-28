@@ -2,24 +2,47 @@
 
 import { AlertCircle, ShoppingBag, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { buttonStyles, ButtonLink } from "@/components/button-link";
 import { EmptyState } from "@/components/empty-state";
 import { ProductImage } from "@/components/product-image";
 import { QuantityInput } from "@/components/quantity-input";
+import type { CartLine } from "@/lib/cart/cart";
 import { cart, useCartLines } from "@/lib/cart/cart-store";
 import { summarizeCart, type CartItem } from "@/lib/cart/summary";
+import { storefrontProducts } from "@/lib/demo/model";
+import { useDemoSnapshot } from "@/lib/demo/store";
 import { formatPrice } from "@/lib/money";
 import { availabilityLabel, getAvailability } from "@/lib/products/availability";
 import type { Product } from "@/lib/products/types";
 import { getCartProducts } from "./actions";
 import { CheckoutForm } from "./checkout-form";
+import { WhatsappCheckout } from "./whatsapp-checkout";
+
+/**
+ * "order": the order is saved in Supabase first (CheckoutForm).
+ * "whatsapp": WhatsApp opens directly with the cart (no Supabase, or demo).
+ */
+export type Checkout =
+  | { kind: "order" }
+  | { kind: "whatsapp"; number: string; storeName: string; demo: boolean };
 
 type Fetched =
   | { key: string; status: "ok"; products: Product[] }
   | { key: string; status: "error" };
 
-export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
+/** Keeps stored quantities within the current stock. */
+function clampToStock(products: Product[]) {
+  const { items } = summarizeCart(cart.lines(), products);
+  for (const item of items) {
+    if (item.purchasable && item.line.quantity > item.maxQuantity) {
+      cart.setQuantity(item.line.productId, item.maxQuantity, item.maxQuantity);
+    }
+  }
+}
+
+/** Cart validated against the server catalog (Supabase). */
+export function CartView({ checkout }: { checkout: Checkout }) {
   const lines = useCartLines();
   const idsKey = lines.map((l) => l.productId).sort().join(",");
   const [fetched, setFetched] = useState<Fetched | null>(null);
@@ -33,13 +56,7 @@ export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
       .then((products) => {
         if (cancelled) return;
         setFetched({ key: idsKey, status: "ok", products });
-        // Keep stored quantities within the current stock.
-        const { items } = summarizeCart(cart.lines(), products);
-        for (const item of items) {
-          if (item.purchasable && item.line.quantity > item.maxQuantity) {
-            cart.setQuantity(item.line.productId, item.maxQuantity, item.maxQuantity);
-          }
-        }
+        clampToStock(products);
       })
       .catch(() => {
         if (!cancelled) setFetched({ key: idsKey, status: "error" });
@@ -49,18 +66,17 @@ export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
     };
   }, [idsKey, attempt]);
 
-  if (lines.length === 0) {
-    return (
-      <div className="mt-6">
-        <EmptyState
-          icon={<ShoppingBag aria-hidden className="size-6" />}
-          title="Seu carrinho está vazio"
-          description="Explore o catálogo e adicione os produtos que você deseja."
-          action={<ButtonLink href="/produtos">Ver produtos</ButtonLink>}
-        />
-      </div>
-    );
-  }
+  // Prices or stock may change while the tab is in the background: read them
+  // again when the customer comes back, before the WhatsApp message is used.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refetch();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [refetch]);
+
+  if (lines.length === 0) return <EmptyCart />;
 
   if (fetched?.key !== idsKey) return <CartSkeleton />;
 
@@ -85,7 +101,59 @@ export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
     );
   }
 
-  const { items, subtotalCents, hasUnavailable } = summarizeCart(lines, fetched.products);
+  return (
+    <CartContents
+      lines={lines}
+      products={fetched.products}
+      checkout={checkout}
+      onCartChanged={refetch}
+    />
+  );
+}
+
+/**
+ * Demo mode: the cart is checked against the catalog kept in the browser,
+ * which is always current (also across tabs).
+ */
+export function DemoCartView({ checkout }: { checkout: Checkout }) {
+  const lines = useCartLines();
+  const state = useDemoSnapshot()?.state;
+  const products = useMemo(() => (state ? storefrontProducts(state) : null), [state]);
+
+  useEffect(() => {
+    if (products) clampToStock(products);
+  }, [products, lines]);
+
+  if (lines.length === 0) return <EmptyCart />;
+  if (!products) return <CartSkeleton />;
+  return <CartContents lines={lines} products={products} checkout={checkout} onCartChanged={() => {}} />;
+}
+
+function EmptyCart() {
+  return (
+    <div className="mt-6">
+      <EmptyState
+        icon={<ShoppingBag aria-hidden className="size-6" />}
+        title="Seu carrinho está vazio"
+        description="Explore o catálogo e adicione os produtos que você deseja."
+        action={<ButtonLink href="/produtos">Ver produtos</ButtonLink>}
+      />
+    </div>
+  );
+}
+
+function CartContents({
+  lines,
+  products,
+  checkout,
+  onCartChanged,
+}: {
+  lines: CartLine[];
+  products: Product[];
+  checkout: Checkout;
+  onCartChanged: () => void;
+}) {
+  const { items, subtotalCents, hasUnavailable } = summarizeCart(lines, products);
 
   return (
     <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start">
@@ -103,7 +171,7 @@ export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
           Resumo
         </h2>
         <dl className="mt-4 flex items-center justify-between border-t border-border pt-4">
-          <dt className="text-sm text-muted">Subtotal</dt>
+          <dt className="text-sm text-muted">Total dos produtos</dt>
           <dd className="text-lg font-semibold">{formatPrice(subtotalCents)}</dd>
         </dl>
         {hasUnavailable && (
@@ -112,10 +180,11 @@ export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
           </p>
         )}
         <p className="mt-4 text-xs text-muted">
-          O pedido é confirmado pela Bruna pelo WhatsApp, após a verificação
-          da disponibilidade.
+          O valor corresponde apenas aos produtos. Entrega e pagamento são
+          combinados com a Bruna pelo WhatsApp, que também confirma a
+          disponibilidade.
         </p>
-        {checkoutEnabled ? (
+        {checkout.kind === "order" ? (
           <CheckoutForm
             lines={items
               .filter((item) => item.purchasable)
@@ -124,22 +193,16 @@ export function CartView({ checkoutEnabled }: { checkoutEnabled: boolean }) {
                 quantity: Math.min(item.line.quantity, item.maxQuantity),
               }))}
             disabled={hasUnavailable || subtotalCents === 0}
-            onCartChanged={refetch}
+            onCartChanged={onCartChanged}
           />
         ) : (
-          <>
-            <button
-              type="button"
-              disabled
-              aria-describedby="finalizar-em-breve"
-              className={`${buttonStyles.primary} mt-5 w-full`}
-            >
-              Finalizar pelo WhatsApp
-            </button>
-            <p id="finalizar-em-breve" className="mt-2 text-center text-xs text-muted">
-              A finalização do pedido estará disponível em breve.
-            </p>
-          </>
+          <WhatsappCheckout
+            items={items}
+            number={checkout.number}
+            storeName={checkout.storeName}
+            hasUnavailable={hasUnavailable}
+            demo={checkout.demo}
+          />
         )}
         <Link
           href="/produtos"

@@ -20,6 +20,14 @@ function supabaseImagePattern() {
   }
 }
 
+// Demo mode keeps fictitious data in the browser and opens the panel without
+// login. It must never become the production store.
+if (process.env.NEXT_PUBLIC_DEMO_MODE === "true" && process.env.VERCEL_ENV === "production") {
+  throw new Error(
+    "NEXT_PUBLIC_DEMO_MODE=true não é permitido em produção. Use um deploy de Preview ou remova a variável.",
+  );
+}
+
 const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,

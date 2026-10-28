@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Package, Tags } from "lucide-react";
+import { LayoutDashboard, Package, ReceiptText, Tags } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -10,8 +10,11 @@ const links = [
   { href: "/admin/categorias", label: "Categorias", icon: Tags, exact: false },
 ] as const;
 
-export function AdminNavLinks({ pathname }: { pathname: string | null }) {
-  return links.map(({ href, label, icon: Icon, exact }) => {
+/** Only the demo has an orders screen for now. */
+const ordersLink = { href: "/admin/pedidos", label: "Pedidos", icon: ReceiptText, exact: false } as const;
+
+export function AdminNavLinks({ pathname, showOrders = false }: { pathname: string | null; showOrders?: boolean }) {
+  return (showOrders ? [...links, ordersLink] : links).map(({ href, label, icon: Icon, exact }) => {
     const active = pathname !== null && (exact ? pathname === href : pathname.startsWith(href));
     return (
       <Link
@@ -29,6 +32,6 @@ export function AdminNavLinks({ pathname }: { pathname: string | null }) {
   });
 }
 
-export function ActiveAdminNavLinks() {
-  return <AdminNavLinks pathname={usePathname()} />;
+export function ActiveAdminNavLinks({ showOrders }: { showOrders?: boolean }) {
+  return <AdminNavLinks pathname={usePathname()} showOrders={showOrders} />;
 }

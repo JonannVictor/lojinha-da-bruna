@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AdminPageHeader, AdminSkeleton } from "@/components/admin/page-header";
 import { ProductForm } from "@/components/admin/product-form";
+import { DemoNewProduct } from "@/components/demo/admin-products";
 import { listAdminCategories } from "@/lib/admin/catalog";
 import { requireAdmin } from "@/lib/auth/admin";
+import { isDemoMode } from "@/lib/demo/mode";
 import { saveProduct } from "../actions";
 
 export const metadata: Metadata = {
@@ -23,9 +25,13 @@ export default function NewProductPage() {
         title="Novo produto"
         description="Depois de salvar, você poderá adicionar as fotos."
       />
-      <Suspense fallback={<AdminSkeleton rows={3} label="Carregando formulário…" />}>
-        <NewProductForm />
-      </Suspense>
+      {isDemoMode() ? (
+        <DemoNewProduct />
+      ) : (
+        <Suspense fallback={<AdminSkeleton rows={3} label="Carregando formulário…" />}>
+          <NewProductForm />
+        </Suspense>
+      )}
     </>
   );
 }

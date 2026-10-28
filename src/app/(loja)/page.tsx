@@ -1,15 +1,21 @@
-import { ArrowRight, PackageOpen } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/button-link";
-import { EmptyState } from "@/components/empty-state";
-import { ProductGrid, ProductGridSkeleton } from "@/components/product-grid";
+import { DemoCategories, DemoFeaturedProducts } from "@/components/demo/storefront";
+import {
+  CategoriesSkeleton,
+  CategoryLinks,
+  FEATURED_LIMIT,
+  FeaturedProductsView,
+} from "@/components/home-sections";
+import { ProductGridSkeleton } from "@/components/product-grid";
 import { storeConfig } from "@/config/store";
+import { isDemoMode } from "@/lib/demo/mode";
 import { listCategories, listProducts } from "@/lib/products/repository";
 
-const FEATURED_LIMIT = 8;
-
 export default function HomePage() {
+  const demo = isDemoMode();
   return (
     <>
       <section className="border-b border-border bg-accent-soft/60">
@@ -39,7 +45,7 @@ export default function HomePage() {
           Categorias
         </h2>
         <Suspense fallback={<CategoriesSkeleton />}>
-          <Categories />
+          {demo ? <DemoCategories /> : <Categories />}
         </Suspense>
       </section>
 
@@ -59,7 +65,7 @@ export default function HomePage() {
           </Link>
         </div>
         <Suspense fallback={<ProductGridSkeleton count={4} />}>
-          <FeaturedProducts />
+          {demo ? <DemoFeaturedProducts /> : <FeaturedProducts />}
         </Suspense>
       </section>
     </>
@@ -67,32 +73,7 @@ export default function HomePage() {
 }
 
 async function Categories() {
-  const categories = await listCategories();
-  return (
-    <ul className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {categories.map((category) => (
-        <li key={category.slug}>
-          <Link
-            href={`/produtos?categoria=${category.slug}`}
-            className="flex h-full items-center justify-between gap-2 rounded-2xl border border-border bg-surface px-4 py-5 font-medium transition-colors hover:border-accent hover:text-accent"
-          >
-            {category.name}
-            <ArrowRight aria-hidden className="size-4 shrink-0" />
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function CategoriesSkeleton() {
-  return (
-    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4" aria-hidden>
-      {Array.from({ length: 4 }, (_, i) => (
-        <div key={i} className="h-16 animate-pulse rounded-2xl bg-surface-muted" />
-      ))}
-    </div>
-  );
+  return <CategoryLinks categories={await listCategories()} />;
 }
 
 async function FeaturedProducts() {
@@ -100,15 +81,5 @@ async function FeaturedProducts() {
   // No product marked as featured yet: fall back to the first active ones.
   const products =
     featured.length > 0 ? featured : await listProducts({ limit: FEATURED_LIMIT });
-
-  if (products.length === 0) {
-    return (
-      <EmptyState
-        icon={<PackageOpen aria-hidden className="size-6" />}
-        title="Novidades chegando"
-        description="Os produtos estão sendo cadastrados. Volte em breve para conferir o catálogo."
-      />
-    );
-  }
-  return <ProductGrid products={products} />;
+  return <FeaturedProductsView products={products} />;
 }
