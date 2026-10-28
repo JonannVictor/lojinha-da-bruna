@@ -35,7 +35,33 @@ revisa e envia.
 
 **Proteção contra produção:** o build falha se `NEXT_PUBLIC_DEMO_MODE=true` e
 `VERCEL_ENV=production`. Para mostrar a demonstração pela Vercel, use um
-deploy de **Preview**. (Nenhum deploy foi feito nesta etapa.)
+deploy de **Preview** (veja abaixo).
+
+## Publicar a demonstração na Vercel
+
+Neste projeto, todo push em `master` gera um deploy de **Produção**, que nunca
+pode usar o modo demonstração. Por isso:
+
+1. Em *Settings → Environment Variables*, crie `NEXT_PUBLIC_DEMO_MODE=true`
+   marcando **somente Preview**. Se a variável também estiver marcada para
+   Production, todo deploy de `master` falha na proteção acima.
+2. Publique a demonstração a partir de outro branch (ex.: `demo`). O endereço
+   fixo desse branch é
+   `lojinha-da-bruna-git-demo-jonannvictors-projects.vercel.app`.
+3. A variável é fixada no build: depois de criá-la ou alterá-la, faça um novo
+   deploy (push no branch ou *Redeploy*). Um deploy feito antes da variável
+   continua sem o modo demonstração e mostra “Catálogo em preparação”.
+4. Os deploys de Preview exigem login na Vercel (*Deployment Protection*).
+   Para quem não tem conta abrir a demonstração, gere um link compartilhável
+   do endereço do branch (*Share* no deploy) ou desative a proteção para
+   Preview.
+5. Confira: a faixa amarela “Demonstração: …” aparece no topo e `/produtos`
+   lista os produtos “(exemplo)”.
+
+Os produtos de exemplo estão no código (`src/lib/demo/seed.ts`) e são
+carregados por qualquer navegador que abra a loja pela primeira vez; nada
+precisa ser cadastrado antes. Alterações feitas no painel ficam só no
+navegador de quem as fez.
 
 ## Como acessar
 

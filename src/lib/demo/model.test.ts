@@ -69,6 +69,22 @@ describe("seed", () => {
     expect(state.orders.every((o) => o.code.startsWith("DEMO-"))).toBe(true);
   });
 
+  it("has eight complete products, seven of them in the storefront", () => {
+    const state = seed();
+    const categoryIds = new Set(state.categories.map((c) => c.id));
+    expect(state.products).toHaveLength(8);
+    for (const product of state.products) {
+      expect(product.slug).toMatch(/^exemplo-[a-z-]+$/);
+      expect(product.description).toMatch(/fictício/);
+      expect(categoryIds.has(product.category_id!)).toBe(true);
+    }
+    // Only "Shampoo" has no price (shown as "Preço sob consulta") and only "Kit presente" is inactive.
+    expect(state.products.filter((p) => p.price_cents === null).map((p) => p.slug)).toEqual(["exemplo-shampoo-nutritivo"]);
+    const visible = storefrontProducts(state);
+    expect(visible).toHaveLength(7);
+    expect(visible.every((p) => p.category !== null)).toBe(true);
+  });
+
   it("orders reference seed products with their prices", () => {
     const state = seed();
     for (const item of state.orders.flatMap((o) => o.items)) {

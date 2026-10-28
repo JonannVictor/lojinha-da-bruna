@@ -32,6 +32,19 @@ function renderCatalog(state: ReturnType<ReturnType<typeof setup>["store"]["getS
 }
 
 describe("panel and storefront integration", () => {
+  it("a first-time visitor sees the demo products without anything being written", () => {
+    const storage = new MemoryStorage();
+    const store = createDemoStore({ getStorage: () => storage });
+
+    const html = renderCatalog(store.getSnapshot().state);
+    expect(html).toContain("7 produtos encontrados.");
+    expect(html).toContain("Paleta de sombras (exemplo)");
+    expect(html).not.toContain("Catálogo em preparação");
+    // The seed is only saved with the first change, so nothing (empty or not)
+    // is persisted ahead of time.
+    expect(storage.data.size).toBe(0);
+  });
+
   it("a product created in the panel appears in the catalog and on its page", async () => {
     const { store, actions } = setup();
     let createdId = "";
