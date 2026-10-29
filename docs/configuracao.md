@@ -32,8 +32,32 @@ O botão "Finalizar pedido pelo WhatsApp" funciona de duas formas:
   (`create_order`) e só então o WhatsApp é aberto, na mesma aba.
 
 Em ambos os casos, só entram itens disponíveis, com preço e estoque atuais.
-A mensagem informa que o valor é apenas dos produtos e que entrega e
-pagamento são combinados com a Bruna. O pedido nunca é declarado confirmado.
+A mensagem informa que o valor é apenas dos produtos e que a entrega é
+combinada com a Bruna. O pedido nunca é declarado confirmado.
+
+## Pix
+
+O carrinho mostra um QR Code Pix (e o "Pix copia e cola") com o total dos
+produtos. O cliente paga, finaliza pelo WhatsApp e envia o comprovante na
+conversa. A mensagem informa "Pix de R$ X pelo QR Code do site" e que a
+entrega é combinada à parte. Se faltar algum item, a Bruna devolve o valor.
+
+O código é um BR Code estático gerado no próprio site
+(`src/lib/payments/pix.ts`), sem intermediário: o dinheiro cai direto na
+conta da chave. O site não confirma o pagamento sozinho; quem confere é a
+Bruna, pelo comprovante e pelo extrato.
+
+Para ativar, preencha `STORE_PIX` em `src/config/store.ts`:
+
+- `key`: CPF/CNPJ, e-mail, chave aleatória ou telefone **com +55**
+  (ex.: `"+5554981394629"`; 11 dígitos sem `+55` são lidos como CPF);
+- `receiverName`: nome do titular, como aparece no banco;
+- `city`: cidade do titular.
+
+Enquanto os três estiverem `null`, o QR Code não aparece e a mensagem diz
+"Entrega e forma de pagamento a combinar". Uma configuração incompleta ou
+inválida interrompe o build. A demonstração usa a mesma configuração: o QR Code
+só aparece depois que a chave real for preenchida.
 
 Passo a passo do Supabase (projeto, migrações, Storage, primeira
 administradora e validação de segurança): [supabase.md](supabase.md).
@@ -51,4 +75,5 @@ Nada abaixo foi inventado. Os campos ficam vazios até a confirmação:
 - [ ] E-mail da conta administradora da Bruna (ver [supabase.md](supabase.md#6-primeira-administradora)).
 - [ ] Instagram, cidade/região de atendimento e horário (em `src/config/store.ts`).
 - [ ] Cor de destaque e eventual logotipo da loja (em `src/app/globals.css`).
-- [ ] Política de entrega/retirada e formas de pagamento.
+- [ ] Chave Pix, nome do titular e cidade (`STORE_PIX` em `src/config/store.ts`).
+- [ ] Política de entrega/retirada e formas de pagamento além do Pix.

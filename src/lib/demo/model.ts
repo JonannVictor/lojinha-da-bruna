@@ -265,7 +265,7 @@ export function setOrderStatus(state: DemoState, id: string, status: OrderStatus
     { ...state, orders: state.orders.map((o) => (o.id === id ? { ...o, status } : o)) },
     undefined,
     ctx,
-    `Pedido de demonstração ${order.code}: status alterado para “${orderStatusLabel[status]}”.`,
+    `Pedido ${order.code}: status alterado para “${orderStatusLabel[status]}”.`,
   );
 }
 

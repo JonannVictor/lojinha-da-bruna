@@ -13,10 +13,12 @@ import { summarizeCart, type CartItem } from "@/lib/cart/summary";
 import { storefrontProducts } from "@/lib/demo/model";
 import { useDemoSnapshot } from "@/lib/demo/store";
 import { formatPrice } from "@/lib/money";
+import type { PixReceiver } from "@/lib/payments/pix";
 import { availabilityLabel, getAvailability } from "@/lib/products/availability";
 import type { Product } from "@/lib/products/types";
 import { getCartProducts } from "./actions";
 import { CheckoutForm } from "./checkout-form";
+import { PixPayment } from "./pix-payment";
 import { WhatsappCheckout } from "./whatsapp-checkout";
 
 /**
@@ -25,7 +27,7 @@ import { WhatsappCheckout } from "./whatsapp-checkout";
  */
 export type Checkout =
   | { kind: "order" }
-  | { kind: "whatsapp"; number: string; storeName: string; demo: boolean };
+  | { kind: "whatsapp"; number: string; storeName: string };
 
 type Fetched =
   | { key: string; status: "ok"; products: Product[] }
@@ -42,7 +44,7 @@ function clampToStock(products: Product[]) {
 }
 
 /** Cart validated against the server catalog (Supabase). */
-export function CartView({ checkout }: { checkout: Checkout }) {
+export function CartView({ checkout, pix }: { checkout: Checkout; pix: PixReceiver | null }) {
   const lines = useCartLines();
   const idsKey = lines.map((l) => l.productId).sort().join(",");
   const [fetched, setFetched] = useState<Fetched | null>(null);
@@ -106,6 +108,7 @@ export function CartView({ checkout }: { checkout: Checkout }) {
       lines={lines}
       products={fetched.products}
       checkout={checkout}
+      pix={pix}
       onCartChanged={refetch}
     />
   );
@@ -115,7 +118,7 @@ export function CartView({ checkout }: { checkout: Checkout }) {
  * Demo mode: the cart is checked against the catalog kept in the browser,
  * which is always current (also across tabs).
  */
-export function DemoCartView({ checkout }: { checkout: Checkout }) {
+export function DemoCartView({ checkout, pix }: { checkout: Checkout; pix: PixReceiver | null }) {
   const lines = useCartLines();
   const state = useDemoSnapshot()?.state;
   const products = useMemo(() => (state ? storefrontProducts(state) : null), [state]);
@@ -126,7 +129,7 @@ export function DemoCartView({ checkout }: { checkout: Checkout }) {
 
   if (lines.length === 0) return <EmptyCart />;
   if (!products) return <CartSkeleton />;
-  return <CartContents lines={lines} products={products} checkout={checkout} onCartChanged={() => {}} />;
+  return <CartContents lines={lines} products={products} checkout={checkout} pix={pix} onCartChanged={() => {}} />;
 }
 
 function EmptyCart() {
@@ -146,14 +149,19 @@ function CartContents({
   lines,
   products,
   checkout,
+  pix,
   onCartChanged,
 }: {
   lines: CartLine[];
   products: Product[];
   checkout: Checkout;
+  pix: PixReceiver | null;
   onCartChanged: () => void;
 }) {
   const { items, subtotalCents, hasUnavailable } = summarizeCart(lines, products);
+  // Saving an order requires every item available, so the QR Code is only
+  // offered when the order can actually be sent.
+  const canSend = subtotalCents > 0 && (checkout.kind === "whatsapp" || !hasUnavailable);
 
   return (
     <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-start">
@@ -180,10 +188,11 @@ function CartContents({
           </p>
         )}
         <p className="mt-4 text-xs text-muted">
-          O valor corresponde apenas aos produtos. Entrega e pagamento são
-          combinados com a Bruna pelo WhatsApp, que também confirma a
-          disponibilidade.
+          {pix
+            ? "O valor corresponde apenas aos produtos. A entrega é combinada com a Bruna pelo WhatsApp, que também confirma a disponibilidade."
+            : "O valor corresponde apenas aos produtos. Entrega e pagamento são combinados com a Bruna pelo WhatsApp, que também confirma a disponibilidade."}
         </p>
+        {pix && canSend && <PixPayment receiver={pix} amountCents={subtotalCents} />}
         {checkout.kind === "order" ? (
           <CheckoutForm
             lines={items
@@ -200,7 +209,7 @@ function CartContents({
             items={items}
             number={checkout.number}
             storeName={checkout.storeName}
-            demo={checkout.demo}
+            pix={pix !== null}
           />
         )}
         <Link

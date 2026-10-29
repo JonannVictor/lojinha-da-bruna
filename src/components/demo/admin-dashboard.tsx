@@ -32,7 +32,7 @@ export function DemoDashboard() {
           { label: "Produtos cadastrados", value: summary.products, href: "/admin/produtos" },
           { label: "Ativos na loja", value: summary.active, href: "/admin/produtos?status=active" },
           { label: "Inativos", value: summary.inactive, href: "/admin/produtos?status=inactive" },
-          { label: "Pedidos de demonstração", value: summary.orders, href: "/admin/pedidos" },
+          { label: "Pedidos", value: summary.orders, href: "/admin/pedidos" },
         ]}
       />
 
@@ -48,16 +48,15 @@ export function DemoDashboard() {
           <div className="flex items-center justify-between gap-3">
             <h2 id="pedidos-recentes" className="flex items-center gap-2 font-semibold">
               <ReceiptText aria-hidden className="size-4 text-muted" />
-              Pedidos de exemplo
+              Pedidos recentes
             </h2>
             <Link href="/admin/pedidos" className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover">
               Ver todos
               <ArrowRight aria-hidden className="size-3.5" />
             </Link>
           </div>
-          <p className="mt-1 text-xs text-muted">Fictícios: nenhum deles é uma venda real.</p>
           {recentOrders.length === 0 ? (
-            <p className="mt-4 text-sm text-muted">Nenhum pedido de exemplo.</p>
+            <p className="mt-4 text-sm text-muted">Nenhum pedido.</p>
           ) : (
             <ul className="mt-3 divide-y divide-border">
               {recentOrders.map((order) => (
@@ -85,7 +84,7 @@ export function DemoDashboard() {
             <History aria-hidden className="size-4 text-muted" />
             Atividade recente
           </h2>
-          <p className="mt-1 text-xs text-muted">Alterações feitas neste navegador durante a demonstração.</p>
+          <p className="mt-1 text-xs text-muted">Alterações feitas neste navegador.</p>
           {activity.length === 0 ? (
             <p className="mt-4 text-sm text-muted">
               Nenhuma alteração ainda. Cadastre ou edite um produto para vê-la aqui.

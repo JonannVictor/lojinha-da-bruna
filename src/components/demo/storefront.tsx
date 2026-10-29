@@ -92,5 +92,5 @@ export function DemoProductDetail({
       </div>
     );
   }
-  return <ProductDetailView product={product} whatsappNumber={whatsappNumber} storeName={storeName} demo />;
+  return <ProductDetailView product={product} whatsappNumber={whatsappNumber} storeName={storeName} />;
 }

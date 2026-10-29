@@ -15,8 +15,8 @@ export default function AdminOrdersPage() {
   return (
     <>
       <AdminPageHeader
-        title="Pedidos de demonstração"
-        description="Pedidos fictícios, apenas para mostrar como o painel funciona. Nenhum é real, e a loja não recebe pedidos nesta demonstração."
+        title="Pedidos"
+        description="Acompanhe os pedidos e atualize o status de cada um."
       />
       <DemoOrderList />
     </>

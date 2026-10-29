@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MemoryStorage } from "@/test/memory-storage";
 import { adminProducts, storefrontProducts } from "./model";
+import { createSeedState } from "./seed";
 import { DEMO_STORAGE_KEY } from "./storage";
 import { createDemoStore } from "./store";
 
@@ -11,13 +12,13 @@ import { createDemoStore } from "./store";
 const now = () => new Date("2026-10-28T12:00:00.000Z");
 
 const VISIBLE = [
-  "Paleta de sombras (exemplo)",
-  "Colônia floral (exemplo)",
-  "Hidratante corporal (exemplo)",
-  "Necessaire de viagem (exemplo)",
-  "Body splash (exemplo)",
-  "Base líquida (exemplo)",
-  "Shampoo nutritivo (exemplo)",
+  "Paleta de sombras",
+  "Colônia floral",
+  "Hidratante corporal",
+  "Necessaire de viagem",
+  "Body splash",
+  "Base líquida",
+  "Shampoo nutritivo",
 ];
 
 function storefrontNames(storage: MemoryStorage | null) {
@@ -34,8 +35,8 @@ describe("first visit to the demonstration", () => {
     const store = createDemoStore({ getStorage: () => new MemoryStorage(), now });
     const panel = adminProducts(store.getSnapshot().state).map((p) => p.name);
     expect(panel).toHaveLength(8);
-    expect(panel).toContain("Kit presente (exemplo)");
-    expect(storefrontNames(new MemoryStorage())).not.toContain("Kit presente (exemplo)");
+    expect(panel).toContain("Kit presente");
+    expect(storefrontNames(new MemoryStorage())).not.toContain("Kit presente");
   });
 
   it("does not depend on other keys the browser already has (cart, other apps)", () => {
@@ -43,6 +44,16 @@ describe("first visit to the demonstration", () => {
     storage.setItem("lojinha-da-bruna:cart:v1", "[]");
     storage.setItem("outro-site", "x");
     expect(storefrontNames(storage)).toEqual(VISIBLE);
+  });
+
+  it("drops data saved under the old key, which had the earlier product names", () => {
+    const storage = new MemoryStorage();
+    const old = JSON.stringify({ ...createSeedState(now()), products: [] });
+    storage.setItem("lojinha-da-bruna:demo:v1", old);
+    storage.setItem("lojinha-da-bruna:demo:v1:corrompido", "x");
+    expect(storefrontNames(storage)).toEqual(VISIBLE);
+    expect(storage.getItem("lojinha-da-bruna:demo:v1")).toBeNull();
+    expect(storage.getItem("lojinha-da-bruna:demo:v1:corrompido")).toBeNull();
   });
 
   it("still shows the catalog when storage is blocked, missing or unreadable", () => {
@@ -65,7 +76,7 @@ describe("data shared by the store and the panel", () => {
     expect((await panel.repository.setProductActive(target.id, false)).ok).toBe(true);
 
     // The store page opened afterwards in the same browser reads the change.
-    expect(storefrontNames(browser)).not.toContain("Body splash (exemplo)");
+    expect(storefrontNames(browser)).not.toContain("Body splash");
     expect(storefrontNames(browser)).toHaveLength(6);
 
     // Anyone else (another browser or device) still gets the initial data.

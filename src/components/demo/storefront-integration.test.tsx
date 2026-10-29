@@ -38,7 +38,7 @@ describe("panel and storefront integration", () => {
 
     const html = renderCatalog(store.getSnapshot().state);
     expect(html).toContain("7 produtos encontrados.");
-    expect(html).toContain("Paleta de sombras (exemplo)");
+    expect(html).toContain("Paleta de sombras");
     expect(html).not.toContain("Catálogo em preparação");
     // The seed is only saved with the first change, so nothing (empty or not)
     // is persisted ahead of time.

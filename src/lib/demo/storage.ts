@@ -8,9 +8,13 @@ import { createSeedState } from "./seed";
 // intact), and the size is checked against a budget below that limit before
 // writing.
 
-export const DEMO_STORAGE_KEY = "lojinha-da-bruna:demo:v1";
+// v2: the initial catalog was renamed (no more "(exemplo)" products), so data
+// saved under v1 is dropped instead of showing the old names.
+export const DEMO_STORAGE_KEY = "lojinha-da-bruna:demo:v2";
 /** Where unreadable data is kept, instead of being silently discarded. */
 export const DEMO_BACKUP_KEY = `${DEMO_STORAGE_KEY}:corrompido`;
+/** Earlier keys, removed on load to free their space (photos can be large). */
+const LEGACY_KEYS = ["lojinha-da-bruna:demo:v1", "lojinha-da-bruna:demo:v1:corrompido"];
 /** Characters (UTF-16 code units), leaving room for the cart and other keys. */
 export const DEMO_STORAGE_BUDGET = 4_000_000;
 
@@ -61,6 +65,7 @@ export function loadDemoState(storage: StorageLike | null, now: Date = new Date(
 
   let raw: string | null;
   try {
+    for (const key of LEGACY_KEYS) storage.removeItem(key);
     raw = storage.getItem(DEMO_STORAGE_KEY);
   } catch {
     const state = seed();

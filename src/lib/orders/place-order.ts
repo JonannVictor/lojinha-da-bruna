@@ -80,7 +80,7 @@ export async function placeOrder(
   return {
     ok: true,
     orderId: order.id,
-    whatsappUrl: buildWhatsappUrl(whatsappNumber, buildOrderMessage(order)),
+    whatsappUrl: buildWhatsappUrl(whatsappNumber, buildOrderMessage(order, { pix: storeConfig.pix !== null })),
   };
 }
 

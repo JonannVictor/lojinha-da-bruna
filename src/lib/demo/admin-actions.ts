@@ -15,11 +15,11 @@ type Action = (state: ActionState, formData: FormData) => Promise<ActionState>;
 type Failure = Exclude<RepositoryResult, { ok: true }>;
 
 export const STORAGE_FULL_MESSAGE =
-  "O armazenamento deste navegador está cheio e a alteração não foi salva. Remova fotos de outros produtos de demonstração ou restaure os dados iniciais.";
+  "O armazenamento deste navegador está cheio e a alteração não foi salva. Remova fotos de outros produtos ou restaure os dados iniciais.";
 export const PHOTO_STORAGE_FULL_MESSAGE =
-  "Não há espaço no armazenamento deste navegador para esta foto. Alternativas: use uma foto menor ou recortada, remova fotos de outros produtos de demonstração ou mantenha o produto sem foto (a loja mostra “Foto em breve”).";
+  "Não há espaço no armazenamento deste navegador para esta foto. Alternativas: use uma foto menor ou recortada, remova fotos de outros produtos ou mantenha o produto sem foto (a loja mostra “Foto em breve”).";
 export const STORAGE_ERROR_MESSAGE =
-  "O navegador não permitiu salvar os dados de demonstração. Verifique se o armazenamento de sites está liberado e tente novamente.";
+  "O navegador não permitiu salvar os dados. Verifique se o armazenamento de sites está liberado e tente novamente.";
 
 function isStorageFailure(result: Failure): result is StorageFailure {
   return result.reason === "storage_full" || result.reason === "storage_error";
@@ -91,7 +91,7 @@ export function createDemoAdminActions(repository: CatalogRepository) {
         if (!result.ok && result.reason === "storage_full") return failure(PHOTO_STORAGE_FULL_MESSAGE);
         return toState(result, "Foto adicionada.", (error) =>
           error.reason === "invalid"
-            ? failure(`Limite de ${MAX_DEMO_IMAGES_PER_PRODUCT} fotos por produto na demonstração.`)
+            ? failure(`Limite de ${MAX_DEMO_IMAGES_PER_PRODUCT} fotos por produto.`)
             : productMutationError(error),
         );
       };

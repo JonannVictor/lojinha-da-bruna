@@ -36,7 +36,21 @@ function itemBlocks(items: ItemLine[]): string[] {
   ]);
 }
 
-export function buildOrderMessage(order: SavedOrder): string {
+/**
+ * With Pix configured the cart shows a QR Code for the products total, paid
+ * before sending; delivery is still charged apart. Without it, payment is
+ * arranged in the chat.
+ */
+function paymentLines(totalCents: number, pix: boolean): string[] {
+  return pix
+    ? [
+        `*Pagamento:* Pix de ${formatPrice(totalCents)} pelo QR Code do site. Envio o comprovante em seguida.`,
+        "_A entrega é combinada à parte._",
+      ]
+    : ["_Valor referente apenas aos produtos. Entrega e forma de pagamento a combinar._"];
+}
+
+export function buildOrderMessage(order: SavedOrder, { pix = false }: { pix?: boolean } = {}): string {
   const lines = [
     "Olá, Bruna! Tudo bem?",
     `Gostaria de confirmar o pedido *#${orderReference(order.id)}*, feito pelo site.`,
@@ -45,6 +59,7 @@ export function buildOrderMessage(order: SavedOrder): string {
     "",
     ...itemBlocks(order.items),
     `*Subtotal: ${formatPrice(order.subtotalCents)}*`,
+    ...paymentLines(order.subtotalCents, pix),
     "",
     "*DADOS DO CLIENTE*",
     `Nome: ${plain(order.customerName)}`,
@@ -63,33 +78,19 @@ export function buildWhatsappUrl(number: string, message: string): string {
 // ---------------------------------------------------------------------------
 
 /**
- * First line of every message sent from the demonstration: the link opens
- * the store's real WhatsApp, so Bruna must be able to tell a test apart from
- * a real order even if it is sent by mistake.
- */
-export const DEMO_MESSAGE_HEADER =
-  "[DEMONSTRAÇÃO] Mensagem de teste: os produtos são fictícios e este não é um pedido real.";
-
-type MessageOptions = { demo?: boolean };
-
-function withDemoHeader(lines: string[], demo: boolean): string[] {
-  return demo ? [DEMO_MESSAGE_HEADER, "", ...lines] : lines;
-}
-
-/**
  * Builds the WhatsApp link with the cart contents. Only purchasable items go
  * into the message, with the quantity and price of the current catalog data
  * (summarizeCart already clamps quantities to the stock). Returns null when
  * nothing can be ordered: empty cart or every item unavailable.
  *
  * The message only REQUESTS the order: the customer reviews and sends it,
- * and Bruna confirms availability, delivery and payment in the chat.
+ * and Bruna confirms availability and delivery in the chat.
  */
 export function buildCartWhatsappLink(
   number: string,
   storeName: string,
   items: CartItem[],
-  { demo = false }: MessageOptions = {},
+  { pix = false }: { pix?: boolean } = {},
 ): { url: string; message: string; totalCents: number } | null {
   const lines = items.flatMap((item) => {
     if (!item.purchasable || !item.product || item.product.price_cents === null) return [];
@@ -100,7 +101,7 @@ export function buildCartWhatsappLink(
   if (lines.length === 0) return null;
 
   const totalCents = lines.reduce((sum, line) => sum + line.quantity * line.unitPriceCents, 0);
-  const message = withDemoHeader([
+  const message = [
     "Olá, Bruna! Tudo bem?",
     `Gostaria de fazer um pedido pelo site da *${plain(storeName)}*.`,
     "",
@@ -108,10 +109,10 @@ export function buildCartWhatsappLink(
     "",
     ...itemBlocks(lines),
     `*Total dos produtos: ${formatPrice(totalCents)}*`,
-    "_Valor referente apenas aos produtos. Entrega e forma de pagamento a combinar._",
+    ...paymentLines(totalCents, pix),
     "",
     "Aguardo a confirmação da disponibilidade. Desde já, agradeço!",
-  ], demo).join("\n");
+  ].join("\n");
 
   return { url: buildWhatsappUrl(number, message), message, totalCents };
 }
@@ -121,7 +122,6 @@ export function buildProductWhatsappUrl(
   number: string,
   storeName: string,
   product: Pick<Product, "name" | "brand" | "price_cents">,
-  { demo = false }: MessageOptions = {},
 ): string {
   const lines = [
     "Olá, Bruna! Tudo bem?",
@@ -132,5 +132,5 @@ export function buildProductWhatsappUrl(
   if (product.brand) lines.push(`Marca: ${plain(product.brand)}`);
   if (product.price_cents !== null) lines.push(`Preço no site: ${formatPrice(product.price_cents)}`);
   lines.push("", "Aguardo seu retorno. Desde já, agradeço!");
-  return buildWhatsappUrl(number, withDemoHeader(lines, demo).join("\n"));
+  return buildWhatsappUrl(number, lines.join("\n"));
 }

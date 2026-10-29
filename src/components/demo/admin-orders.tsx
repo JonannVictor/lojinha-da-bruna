@@ -22,8 +22,8 @@ export function DemoOrderList() {
     return (
       <EmptyState
         icon={<ReceiptText aria-hidden className="size-6" />}
-        title="Nenhum pedido de exemplo"
-        description="Restaure os dados iniciais para ver os pedidos de demonstração."
+        title="Nenhum pedido"
+        description="Os pedidos aparecem aqui."
       />
     );
   }
@@ -45,7 +45,7 @@ function OrderCard({ order }: { order: DemoOrder }) {
     const result = await demoRepository.setOrderStatus(order.id, status);
     setFeedback(
       result.ok
-        ? { tone: "success", message: "Status atualizado (apenas nesta demonstração)." }
+        ? { tone: "success", message: "Status atualizado." }
         : {
             tone: "error",
             message:
@@ -64,9 +64,6 @@ function OrderCard({ order }: { order: DemoOrder }) {
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 font-semibold">
             {order.code}
-            <span className="rounded-full bg-warning-soft px-2 py-0.5 text-xs font-medium text-warning">
-              Demonstração
-            </span>
             <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${orderStatusStyles[order.status]}`}>
               {orderStatusLabel[order.status]}
             </span>

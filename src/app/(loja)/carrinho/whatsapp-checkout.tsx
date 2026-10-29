@@ -1,4 +1,4 @@
-import { Info, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { buttonStyles } from "@/components/button-link";
 import type { CartItem } from "@/lib/cart/summary";
 import { buildCartWhatsappLink } from "@/lib/orders/whatsapp";
@@ -12,14 +12,15 @@ export function WhatsappCheckout({
   items,
   number,
   storeName,
-  demo,
+  pix,
 }: {
   items: CartItem[];
   number: string;
   storeName: string;
-  demo: boolean;
+  /** Pix QR Code shown above: the message says it was paid that way. */
+  pix: boolean;
 }) {
-  const link = buildCartWhatsappLink(number, storeName, items, { demo });
+  const link = buildCartWhatsappLink(number, storeName, items, { pix });
 
   return (
     <div className="mt-5 space-y-3">
@@ -51,20 +52,13 @@ export function WhatsappCheckout({
         {link ? (
           <p>
             O WhatsApp será aberto com a mensagem pronta para você revisar e
-            enviar. O pedido só é confirmado pela Bruna na conversa.
+            enviar{pix && ". Mande o comprovante do Pix na mesma conversa"}. O
+            pedido só é confirmado pela Bruna na conversa.
           </p>
         ) : (
           <p className="text-warning">
             Nenhum item disponível para finalizar. Remova os itens indisponíveis
             ou adicione outros produtos.
-          </p>
-        )}
-        {demo && (
-          <p className="flex gap-2 rounded-xl bg-warning-soft px-3 py-2.5 text-warning">
-            <Info aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-            Demonstração: os produtos são fictícios, mas o link abre o WhatsApp
-            real da loja. Envie a mensagem apenas em testes combinados com a
-            Bruna. A mensagem já começa identificada como teste.
           </p>
         )}
       </div>

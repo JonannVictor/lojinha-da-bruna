@@ -4,8 +4,9 @@ import type { CartLine } from "@/lib/cart/cart";
 import { summarizeCart } from "@/lib/cart/summary";
 import { setProductActive, storefrontProducts, updateProduct } from "@/lib/demo/model";
 import { createSeedState } from "@/lib/demo/seed";
+import { formatPrice } from "@/lib/money";
 import type { Product } from "@/lib/products/types";
-import { buildCartWhatsappLink, buildProductWhatsappUrl, DEMO_MESSAGE_HEADER } from "./whatsapp";
+import { buildCartWhatsappLink, buildProductWhatsappUrl } from "./whatsapp";
 
 const NUMBER = "555481394629";
 const STORE = "Lojinha da Bruna";
@@ -65,10 +66,10 @@ describe("buildCartWhatsappLink", () => {
         "",
         "*RESUMO DO PEDIDO*",
         "",
-        "*1. Hidratante corporal (exemplo)*",
+        "*1. Hidratante corporal*",
         "3 un. × R$ 29,00 = R$ 87,00",
         "",
-        "*2. Colônia floral (exemplo)*",
+        "*2. Colônia floral*",
         "1 un. × R$ 89,00 = R$ 89,00",
         "",
         "*Total dos produtos: R$ 176,00*",
@@ -85,6 +86,16 @@ describe("buildCartWhatsappLink", () => {
     expect(text).toContain("aguardo a confirmação");
   });
 
+  it("states the Pix payment of the products total when the QR Code is offered", () => {
+    const lines = [{ productId: colonia.id, quantity: 2 }];
+    const result = buildCartWhatsappLink(NUMBER, STORE, summarizeCart(lines, products).items, { pix: true })!;
+    expect(result.message).toContain(
+      `*Total dos produtos: ${formatPrice(17800)}*\n*Pagamento:* Pix de ${formatPrice(17800)} pelo QR Code do site. Envio o comprovante em seguida.\n_A entrega é combinada à parte._`,
+    );
+    expect(result.message).not.toContain("forma de pagamento a combinar");
+    expect(result.message.toLowerCase()).not.toMatch(/confirmado|frete|desconto|taxa|cartão|parcela/);
+  });
+
   it("encodes accents, line breaks and symbols for the URL", () => {
     const result = link([{ productId: colonia.id, quantity: 2 }])!;
     const query = result.url.split("?text=")[1];
@@ -92,18 +103,6 @@ describe("buildCartWhatsappLink", () => {
     expect(query).toContain(encodeURIComponent("Colônia"));
     expect(query).toContain("%0A");
     expect(query).toBe(encodeURIComponent(result.message));
-  });
-
-  it("identifies a demonstration cart as a test, never as a real order", () => {
-    const lines = [{ productId: colonia.id, quantity: 1 }];
-    const demo = buildCartWhatsappLink(NUMBER, STORE, summarizeCart(lines, products).items, { demo: true })!;
-    const text = decodedText(demo.url);
-    expect(text.split("\n")[0]).toBe(DEMO_MESSAGE_HEADER);
-    expect(DEMO_MESSAGE_HEADER).toMatch(/DEMONSTRAÇÃO.*fictícios.*não é um pedido real/);
-    // Same order details after the notice.
-    expect(text.endsWith(link(lines)!.message)).toBe(true);
-    // Real store: no notice.
-    expect(link(lines)!.message).not.toContain("DEMONSTRAÇÃO");
   });
 
   it("is null for an empty cart or when every item is unavailable", () => {
@@ -148,14 +147,14 @@ describe("buildCartWhatsappLink", () => {
 });
 describe("buildProductWhatsappUrl", () => {
   it("starts a conversation about the product", () => {
-    const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, colonia));
+    const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, { ...colonia, brand: "Marca X" }));
     expect(text).toBe(
       [
         "Olá, Bruna! Tudo bem?",
         "Vi no site da *Lojinha da Bruna* o produto abaixo e gostaria de mais informações:",
         "",
-        "*Colônia floral (exemplo)*",
-        "Marca: Marca fictícia",
+        "*Colônia floral*",
+        "Marca: Marca X",
         "Preço no site: R$ 89,00",
         "",
         "Aguardo seu retorno. Desde já, agradeço!",
@@ -163,15 +162,15 @@ describe("buildProductWhatsappUrl", () => {
     );
   });
 
-  it("starts with the demonstration notice in demo mode", () => {
-    const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, colonia, { demo: true }));
-    expect(text.split("\n")[0]).toBe(DEMO_MESSAGE_HEADER);
-    expect(text).toContain("*Colônia floral (exemplo)*");
+  it("never adds a test notice", () => {
+    const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, colonia));
+    expect(text.startsWith("Olá, Bruna!")).toBe(true);
+    expect(text).not.toMatch(/demonstra|teste|fictíci/i);
   });
 
   it("omits the price when it is pending and the brand when missing", () => {
     const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, { ...shampoo, brand: null }));
-    expect(text).toContain("*Shampoo nutritivo (exemplo)*\n\nAguardo seu retorno.");
+    expect(text).toContain("*Shampoo nutritivo*\n\nAguardo seu retorno.");
     expect(text).not.toMatch(/Marca|Preço/);
   });
 

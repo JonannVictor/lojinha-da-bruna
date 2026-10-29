@@ -16,11 +16,6 @@ export function AdminNav() {
           <span className="ml-2 rounded-full bg-accent-soft px-2 py-0.5 align-middle font-sans text-xs font-semibold text-accent">
             Painel
           </span>
-          {demo && (
-            <span className="ml-1.5 rounded-full bg-warning-soft px-2 py-0.5 align-middle font-sans text-xs font-semibold text-warning">
-              Demonstração
-            </span>
-          )}
         </Link>
 
         <nav aria-label="Painel" className="order-last -mx-1 flex w-full gap-1 overflow-x-auto sm:order-none sm:w-auto">

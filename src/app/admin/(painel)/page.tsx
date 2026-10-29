@@ -19,7 +19,7 @@ export default function AdminHomePage() {
     <>
       <AdminPageHeader
         title="Painel"
-        description={demo ? "Resumo dos dados de demonstração." : "Resumo do catálogo da loja."}
+        description="Resumo do catálogo da loja."
         action={
           <div className="flex flex-wrap gap-2">
             <ButtonLink href="/" target="_blank" variant="secondary">

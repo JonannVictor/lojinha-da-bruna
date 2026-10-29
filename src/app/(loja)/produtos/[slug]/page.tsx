@@ -7,14 +7,18 @@ import { DemoProductDetail } from "@/components/demo/storefront";
 import { ProductDetailSkeleton, ProductDetailView } from "@/components/product-detail";
 import { storeConfig } from "@/config/store";
 import { isDemoMode } from "@/lib/demo/mode";
+import { findSeedProduct } from "@/lib/demo/seed";
 import { getProductBySlug } from "@/lib/products/repository";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/produtos/[slug]">): Promise<Metadata> {
-  // Demo products live in the browser: the server can't know their names.
-  if (isDemoMode()) return { title: "Produto (demonstração)" };
   const { slug } = await params;
+  // Demo products live in the browser: the server only knows the initial ones.
+  if (isDemoMode()) {
+    const seeded = findSeedProduct(slug);
+    return { title: seeded?.name ?? "Produto", description: seeded?.description };
+  }
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Produto não encontrado" };
   return {

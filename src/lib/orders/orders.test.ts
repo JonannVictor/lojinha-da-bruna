@@ -93,6 +93,10 @@ describe("WhatsApp message", () => {
     expect(message).toMatch(/\*1\. Sérum\*\n2 un\. × R\$\s29,90 = R\$\s59,80\n/);
     expect(message).toMatch(/\*Subtotal: R\$\s59,80\*/);
     expect(message).toContain("Nome: Ana");
+    expect(message).toContain("Entrega e forma de pagamento a combinar");
+    expect(buildOrderMessage(order, { pix: true })).toMatch(
+      /\*Subtotal: R\$\s59,80\*\n\*Pagamento:\* Pix de R\$\s59,80 pelo QR Code do site\. Envio o comprovante em seguida\./,
+    );
     expect(message).toContain("Endereço: Rua A, 1");
   });
 

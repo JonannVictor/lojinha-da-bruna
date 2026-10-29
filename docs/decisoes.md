@@ -190,9 +190,10 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
   pode servir a demonstração; quando o Supabase for configurado em produção,
   o build exige remover as variáveis da demonstração. Valores ambíguos
   (`1`, `TRUE`, autorização sem o modo ligado) também interrompem o build.
-- Na demonstração, toda mensagem do WhatsApp começa com
-  `[DEMONSTRAÇÃO] Mensagem de teste…`, porque o link abre o número real da
-  loja.
+- A demonstração tem a aparência da versão final: sem avisos na vitrine,
+  sem "(exemplo)" nos produtos e sem aviso de teste nas mensagens do WhatsApp
+  (decisão do responsável pelo projeto, 28/10/2026). Como o link abre o número
+  real da loja, a Bruna não distingue pelo texto um teste de um pedido.
 - Nenhum arquivo do Supabase (migrações, clientes, ações) foi removido.
 
 ## Dados no navegador
@@ -231,8 +232,8 @@ nothing`). Nenhum produto, preço ou dado comercial foi criado.
   páginas escolhem a origem (servidor ou navegador). URLs inalteradas.
 - O carrinho foi dividido em `CartContents` (apresentação) com duas fontes:
   `CartView` (server action) e `DemoCartView` (catálogo local). Na
-  demonstração, o botão abre o WhatsApp com os produtos do carrinho e avisa
-  que eles são fictícios (ver "Integração com o WhatsApp").
+  demonstração, o botão abre o WhatsApp com os produtos do carrinho (ver
+  "Integração com o WhatsApp").
 
 ## Fotos
 

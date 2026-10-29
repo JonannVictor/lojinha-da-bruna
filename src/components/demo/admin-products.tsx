@@ -132,7 +132,7 @@ export function DemoProductList({
           <EmptyState
             icon={<PackageOpen aria-hidden className="size-6" />}
             title="Nenhum produto cadastrado"
-            description="Cadastre um produto de demonstração ou restaure os dados iniciais."
+            description="Cadastre o primeiro produto ou restaure os dados iniciais."
             action={<ButtonLink href="/admin/produtos/novo">Novo produto</ButtonLink>}
           />
         )
@@ -177,7 +177,7 @@ export function DemoProductEditor({ id, created }: { id: string; created: boolea
       <EmptyState
         icon={<SearchX aria-hidden className="size-6" />}
         title="Produto não encontrado"
-        description="Ele pode ter sido excluído ou os dados de demonstração foram restaurados."
+        description="Ele pode ter sido excluído ou os dados iniciais foram restaurados."
         action={<ButtonLink href="/admin/produtos">Voltar para produtos</ButtonLink>}
       />
     );
@@ -228,7 +228,7 @@ export function DemoProductEditor({ id, created }: { id: string; created: boolea
             limits={DEMO_IMAGE_LIMITS}
             note={
               <p className="mt-2 rounded-xl bg-surface-muted px-3 py-2 text-xs text-muted">
-                Demonstração: as fotos ficam salvas só neste navegador, reduzidas para cerca de 800 px. Use apenas
+                As fotos ficam salvas só neste navegador, reduzidas para cerca de 800 px. Use apenas
                 fotos que você pode mostrar; elas não são enviadas a nenhum servidor.
               </p>
             }

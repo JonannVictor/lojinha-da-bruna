@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, FlaskConical, LoaderCircle, RotateCcw } from "lucide-react";
+import { AlertTriangle, HardDrive, LoaderCircle, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { cart } from "@/lib/cart/cart-store";
 import { demoRepository, useDemoSnapshot } from "@/lib/demo/store";
@@ -17,7 +17,7 @@ export function DemoPanelNotice() {
 
   async function restore() {
     const confirmed = window.confirm(
-      "Restaurar os dados de demonstração? Todos os produtos, categorias, fotos e status de pedidos alterados neste navegador serão descartados, e o carrinho será esvaziado.",
+      "Restaurar os dados iniciais? Todos os produtos, categorias, fotos e status de pedidos alterados neste navegador serão descartados, e o carrinho será esvaziado.",
     );
     if (!confirmed) return;
     setBusy(true);
@@ -25,7 +25,7 @@ export function DemoPanelNotice() {
     setBusy(false);
     if (result.ok) {
       cart.clear();
-      setFeedback({ tone: "success", message: "Dados de demonstração restaurados." });
+      setFeedback({ tone: "success", message: "Dados iniciais restaurados." });
     } else {
       setFeedback({ tone: "error", message: STORAGE_ERROR_MESSAGE });
     }
@@ -35,16 +35,15 @@ export function DemoPanelNotice() {
     <div className="mb-6 space-y-2">
       <div
         role="note"
-        className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-warning/25 bg-warning-soft/60 px-4 py-3 text-xs text-warning sm:text-sm"
+        className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border bg-surface px-4 py-3 text-xs text-muted sm:text-sm"
       >
-        <FlaskConical aria-hidden className="size-4 shrink-0" />
+        <HardDrive aria-hidden className="size-4 shrink-0" />
         {/* min-w pushes the button to its own line on phones. */}
         <p className="min-w-56 flex-1">
-          <strong className="font-semibold">Modo demonstração.</strong> Os dados são fictícios e as alterações
-          ficam armazenadas apenas neste navegador: outras pessoas e outros aparelhos continuam vendo os dados
-          iniciais. O painel não exige login: não use este modo para dados reais.
+          As alterações deste painel ficam salvas apenas neste navegador: outros aparelhos continuam vendo os
+          dados iniciais.
           {snapshot?.persistent && (
-            <span className="text-warning/80">
+            <span>
               {" "}
               Armazenamento local usado:{" "}
               {storageUsagePercent(snapshot.size) < 1 ? "menos de 1%" : `${storageUsagePercent(snapshot.size)}%`}.
@@ -55,7 +54,7 @@ export function DemoPanelNotice() {
           type="button"
           onClick={restore}
           disabled={busy || !snapshot}
-          className="inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-surface px-3 py-1.5 text-xs font-semibold text-warning transition-colors hover:border-warning disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
         >
           {busy ? <LoaderCircle aria-hidden className="size-3.5 animate-spin" /> : <RotateCcw aria-hidden className="size-3.5" />}
           Restaurar dados iniciais
@@ -64,7 +63,7 @@ export function DemoPanelNotice() {
 
       {snapshot?.issue === "corrupted" && (
         <Warning>
-          Os dados salvos neste navegador estavam ilegíveis e foram substituídos pelos dados iniciais de demonstração.
+          Os dados salvos neste navegador estavam ilegíveis e foram substituídos pelos dados iniciais.
         </Warning>
       )}
       {snapshot?.issue === "unavailable" && (

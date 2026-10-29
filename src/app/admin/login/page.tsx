@@ -1,4 +1,4 @@
-import { AlertCircle, FlaskConical, Settings } from "lucide-react";
+import { AlertCircle, Settings } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -36,12 +36,8 @@ async function LoginContent({ searchParams }: Pick<PageProps<"/admin/login">, "s
   if (isDemoMode()) {
     return (
       <div className="mt-4 space-y-4">
-        <p className="flex gap-3 rounded-xl bg-warning-soft p-4 text-sm text-warning">
-          <FlaskConical aria-hidden className="mt-0.5 size-4 shrink-0" />
-          Modo demonstração: o painel abre sem login e usa apenas dados fictícios salvos neste navegador.
-        </p>
         <ButtonLink href="/admin" className="w-full">
-          Abrir painel de demonstração
+          Entrar no painel
         </ButtonLink>
       </div>
     );

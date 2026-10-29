@@ -61,19 +61,19 @@ function input(overrides: Partial<ProductInput> = {}): ProductInput {
 }
 
 describe("seed", () => {
-  it("is clearly fictitious and pictured by bundled illustrations", () => {
+  it("reads like the final store, names no brand and is pictured by bundled illustrations", () => {
     const state = seed();
     expect(state.products.length).toBeGreaterThan(0);
     for (const product of state.products) {
-      expect(product.name).toMatch(/\(exemplo\)$/);
-      expect(product.brand).toBe("Marca fictícia");
+      expect(`${product.name} ${product.description}`).not.toMatch(/exemplo|fictíci|demonstra/i);
+      expect(product.brand).toBeNull();
       expect(product.images).toHaveLength(1);
       const [image] = product.images;
       expect(image.url.startsWith(`${DEMO_IMAGE_DIR}/`)).toBe(true);
       expect(image.alt).toMatch(/^Ilustração /);
       expect(existsSync(join(process.cwd(), "public", image.url))).toBe(true);
     }
-    expect(state.orders.every((o) => o.code.startsWith("DEMO-"))).toBe(true);
+    expect(state.orders.every((o) => o.code.startsWith("PED-") && !/demonstra/i.test(o.customer_name))).toBe(true);
   });
 
   it("has eight complete products, seven of them in the storefront", () => {
@@ -81,12 +81,12 @@ describe("seed", () => {
     const categoryIds = new Set(state.categories.map((c) => c.id));
     expect(state.products).toHaveLength(8);
     for (const product of state.products) {
-      expect(product.slug).toMatch(/^exemplo-[a-z-]+$/);
-      expect(product.description).toMatch(/fictício/);
+      expect(product.slug).toMatch(/^[a-z]+(-[a-z]+)*$/);
+      expect(product.description!.length).toBeGreaterThan(20);
       expect(categoryIds.has(product.category_id!)).toBe(true);
     }
     // Only "Shampoo" has no price (shown as "Preço sob consulta") and only "Kit presente" is inactive.
-    expect(state.products.filter((p) => p.price_cents === null).map((p) => p.slug)).toEqual(["exemplo-shampoo-nutritivo"]);
+    expect(state.products.filter((p) => p.price_cents === null).map((p) => p.slug)).toEqual(["shampoo-nutritivo"]);
     const visible = storefrontProducts(state);
     expect(visible).toHaveLength(7);
     expect(visible.every((p) => p.category !== null)).toBe(true);
@@ -184,9 +184,9 @@ describe("panel filters", () => {
     const state = seed();
     const perfumaria = state.categories.find((c) => c.slug === "perfumaria")!;
 
-    expect(adminProducts(state, { query: "colonia" }).map((p) => p.name)).toEqual(["Colônia floral (exemplo)"]);
+    expect(adminProducts(state, { query: "colonia" }).map((p) => p.name)).toEqual(["Colônia floral"]);
     expect(adminProducts(state, { category: perfumaria.id }).every((p) => p.category_id === perfumaria.id)).toBe(true);
-    expect(adminProducts(state, { status: "inactive" }).map((p) => p.name)).toEqual(["Kit presente (exemplo)"]);
+    expect(adminProducts(state, { status: "inactive" }).map((p) => p.name)).toEqual(["Kit presente"]);
     expect(adminProducts(state, { status: "active" }).every((p) => p.is_active)).toBe(true);
     expect(adminProducts(state, { category: "none" })).toEqual([]);
     expect(adminProducts(state, { query: "colonia", status: "inactive" })).toEqual([]);
@@ -194,7 +194,7 @@ describe("panel filters", () => {
 
   it("storefront search ignores accents and inactive products", () => {
     const products = storefrontProducts(seed());
-    expect(filterProducts(products, { query: "COLONIA" }).map((p) => p.name)).toEqual(["Colônia floral (exemplo)"]);
+    expect(filterProducts(products, { query: "COLONIA" }).map((p) => p.name)).toEqual(["Colônia floral"]);
     expect(filterProducts(products, { query: "kit presente" })).toEqual([]);
     expect(filterProducts(products, { categorySlug: "beleza" }).every((p) => p.category?.slug === "beleza")).toBe(true);
   });

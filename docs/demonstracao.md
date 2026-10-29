@@ -5,9 +5,13 @@ funcionam por completo, mas os dados ficam salvos apenas no navegador de quem
 está usando (`localStorage`). Nada é enviado a um servidor, e o site não
 registra pedidos.
 
-> **Não é um ambiente de produção.** O painel abre sem login, os dados são
-> fictícios e qualquer pessoa com acesso ao navegador pode alterá-los. Não use
-> este modo para dados reais ou sensíveis.
+> **Não é um ambiente de produção.** O painel abre sem login, os produtos
+> iniciais não foram confirmados pela Bruna e qualquer pessoa com acesso ao
+> navegador pode alterar os dados. Não use este modo para dados reais ou
+> sensíveis.
+>
+> A vitrine e as mensagens **não** indicam que é uma demonstração: o site tem
+> a aparência da versão final, com o catálogo inicial de `seed.ts`.
 
 ## Como ativar
 
@@ -27,15 +31,13 @@ reinicie. A implementação com Supabase continua intacta e volta a ser usada.
 Com o modo ligado, o servidor nunca consulta o Supabase, mesmo que as
 variáveis dele estejam preenchidas.
 
-**WhatsApp na demonstração:** o botão "Finalizar pedido pelo WhatsApp" abre o
-WhatsApp **real** da loja (+55 54 8139-4629) com os produtos do carrinho. Por
-isso, na demonstração:
-
-- o carrinho avisa que os produtos são fictícios e pede para enviar a
-  mensagem apenas em testes combinados com a Bruna;
-- toda mensagem (carrinho e “Tirar dúvidas” na página do produto) começa com
-  `[DEMONSTRAÇÃO] Mensagem de teste: os produtos são fictícios e este não é um
-  pedido real.`, para que um envio por engano não pareça um pedido.
+**WhatsApp e Pix na demonstração:** o botão "Finalizar pedido pelo WhatsApp"
+abre o WhatsApp **real** da loja (+55 54 8139-4629) com os produtos do
+carrinho, e a mensagem é igual à da loja real (sem aviso de teste). O QR Code
+Pix usa a mesma configuração da loja real (`STORE_PIX`): enquanto ela estiver
+vazia, não aparece. Ou seja, um visitante pode enviar um pedido (e, com o Pix
+configurado, pagar) por um produto do catálogo inicial; troque esse catálogo
+pelos produtos reais antes de divulgar o site.
 
 Nada é enviado automaticamente: o visitante revisa e envia.
 
@@ -105,37 +107,37 @@ aparelhos continuam vendo os dados iniciais.
 - Painel: `http://localhost:3000/admin` (sem login; `/admin/login` apenas
   explica isso e leva ao painel)
 
-Uma faixa amarela identifica a demonstração no painel (a loja não exibe
-aviso), e o carrinho avisa que os produtos são fictícios antes de abrir o
-WhatsApp.
+Uma faixa discreta no painel lembra que as alterações ficam salvas só neste
+navegador e oferece "Restaurar dados iniciais". A loja não exibe aviso.
 
 ## O que dá para fazer
 
 | Área | Recursos |
 | --- | --- |
-| Início do painel | Produtos cadastrados, ativos, inativos e pedidos de demonstração; pendências do catálogo; pedidos de exemplo; atividade recente; atalhos para novo produto e para a loja. |
+| Início do painel | Produtos cadastrados, ativos, inativos e pedidos; pendências do catálogo; pedidos recentes; atividade recente; atalhos para novo produto e para a loja. |
 | Produtos | Busca por nome ou marca, filtros por categoria e status, cadastro, edição, ativação/desativação, exclusão com confirmação, até 3 fotos por produto com pré-visualização. |
 | Categorias | Criação, edição de nome e endereço, ordem, ativação/desativação e exclusão (só sem produtos). |
-| Pedidos | Pedidos fictícios `DEMO-…`, com itens, subtotal e troca de status. |
+| Pedidos | Pedidos iniciais `PED-…` (não vêm do site), com itens, subtotal e troca de status. |
 | Loja | Produtos e categorias do painel, busca, filtros, página do produto (com botão de dúvidas pelo WhatsApp) e carrinho com finalização pelo WhatsApp. |
 
 ## Restaurar os dados iniciais
 
-No painel, clique em **Restaurar dados iniciais** (na faixa amarela, em
+No painel, clique em **Restaurar dados iniciais** (na faixa do topo, em
 qualquer página) e confirme. Tudo o que foi alterado neste navegador é
-descartado, os dados de exemplo voltam e o carrinho é esvaziado.
+descartado, os dados iniciais voltam e o carrinho é esvaziado.
 
 Alternativa manual: nas ferramentas do navegador (Aplicativo → Armazenamento
-local), apague a chave `lojinha-da-bruna:demo:v1`.
+local), apague a chave `lojinha-da-bruna:demo:v2`. (A chave `v1`, do catálogo
+com nomes “(exemplo)”, é apagada sozinha na primeira visita.)
 
-## Dados de exemplo
+## Dados iniciais
 
-Oito produtos **fictícios** (nome terminado em “(exemplo)”, marca “Marca
-fictícia”, cada um com uma ilustração própria, sem marca, em
-`public/demo/produtos`), as quatro categorias do briefing e três pedidos
-`DEMO-001` a `DEMO-003` de “Cliente de demonstração”. Nenhum deles representa
-um produto, preço ou venda real da Bruna. Os exemplos cobrem os estados da
-loja: esgotado, preço a confirmar e inativo.
+Oito produtos com nome e descrição de loja de verdade, sem marca, cada um com
+uma ilustração própria em `public/demo/produtos`; as quatro categorias do
+briefing; e três pedidos `PED-001` a `PED-003` com nomes de clientes
+inventados. **Nenhum deles foi confirmado pela Bruna**: preços, estoques e
+descrições são provisórios e devem ser substituídos pelo catálogo real. Os
+produtos cobrem os estados da loja: esgotado, preço a confirmar e inativo.
 
 ## Fotos e limites do navegador
 
@@ -148,7 +150,7 @@ loja: esgotado, preço a confirmar e inativo.
   manter o produto sem foto (a loja mostra “Foto em breve”).
 - Dados ilegíveis (JSON inválido) são substituídos pelos dados iniciais, com
   aviso no painel; a cópia original fica em
-  `lojinha-da-bruna:demo:v1:corrompido`.
+  `lojinha-da-bruna:demo:v2:corrompido`.
 - Em janelas anônimas que bloqueiam o armazenamento, a demonstração funciona,
   mas as alterações se perdem ao recarregar (o painel avisa).
 
