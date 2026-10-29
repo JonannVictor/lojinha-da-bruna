@@ -10,7 +10,7 @@ export default function NotFound() {
     <>
       <SiteHeader />
       <main id="conteudo" className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="container-page py-12 sm:py-16">
           <EmptyState
             icon={<SearchX aria-hidden className="size-6" />}
             title="Página não encontrada"

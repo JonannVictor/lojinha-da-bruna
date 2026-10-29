@@ -13,13 +13,13 @@ type Props = {
 
 export function QuantityInput({ value, max, onChange, label, min = 1 }: Props) {
   const buttonClass =
-    "flex size-10 items-center justify-center text-foreground hover:text-accent disabled:cursor-not-allowed disabled:opacity-40";
+    "flex size-11 items-center justify-center rounded-full text-foreground transition-colors hover:text-accent disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:text-foreground";
 
   return (
     <div
       role="group"
       aria-label={label}
-      className="inline-flex items-center rounded-full border border-border bg-surface"
+      className="inline-flex shrink-0 items-center rounded-full border border-border bg-surface"
     >
       <button
         type="button"
@@ -42,7 +42,7 @@ export function QuantityInput({ value, max, onChange, label, min = 1 }: Props) {
           if (Number.isNaN(next)) return;
           onChange(Math.max(min, Math.min(next, max)));
         }}
-        className="w-10 [appearance:textfield] bg-transparent text-center text-sm font-semibold focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        className="w-9 [appearance:textfield] bg-transparent text-center text-sm font-semibold tabular-nums focus-visible:rounded focus-visible:outline-2 focus-visible:outline-accent [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
       />
       <button
         type="button"

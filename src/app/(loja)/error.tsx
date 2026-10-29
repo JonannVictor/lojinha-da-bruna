@@ -17,7 +17,7 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div role="alert" className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <div role="alert" className="container-page py-12 sm:py-16">
       <EmptyState
         icon={<AlertCircle aria-hidden className="size-6" />}
         title="Algo deu errado"

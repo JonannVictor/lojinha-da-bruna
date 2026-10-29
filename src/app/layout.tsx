@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
-import { Fraunces, Manrope } from "next/font/google";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { storeConfig } from "@/config/store";
 import "./globals.css";
 
-const heading = Fraunces({
+// Editorial serif for titles; Manrope for text, prices, forms and buttons.
+const heading = Cormorant_Garamond({
   variable: "--font-heading",
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
 const body = Manrope({

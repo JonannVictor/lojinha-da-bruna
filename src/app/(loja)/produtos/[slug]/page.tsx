@@ -1,6 +1,4 @@
-import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { DemoProductDetail } from "@/components/demo/storefront";
@@ -29,14 +27,8 @@ export async function generateMetadata({
 
 export default function ProductPage({ params }: PageProps<"/produtos/[slug]">) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <Link
-        href="/produtos"
-        className="inline-flex items-center gap-1 text-sm text-muted hover:text-accent"
-      >
-        <ChevronLeft aria-hidden className="size-4" />
-        Voltar para produtos
-      </Link>
+    // The breadcrumb (with the way back to the catalog) is part of the view.
+    <div className="container-page pt-6 sm:pt-8">
       <Suspense fallback={<ProductDetailSkeleton />}>
         <ProductDetail params={params} />
       </Suspense>

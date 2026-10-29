@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CatalogResults, CatalogSkeleton } from "@/components/catalog-results";
 import { DemoCatalog } from "@/components/demo/storefront";
+import { PageIntro } from "@/components/page-intro";
 import { isDemoMode } from "@/lib/demo/mode";
 import { listCategories, listProducts } from "@/lib/products/repository";
 
@@ -17,8 +18,11 @@ function firstValue(value: string | string[] | undefined): string {
 
 export default function CatalogPage({ searchParams }: PageProps<"/produtos">) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <h1 className="font-display text-3xl font-semibold">Produtos</h1>
+    <div className="container-page pt-8 sm:pt-12">
+      <PageIntro eyebrow="Catálogo" title="Produtos">
+        Beleza, perfumaria, cuidados pessoais e variedades. Adicione ao carrinho
+        e finalize o pedido com a Bruna pelo WhatsApp.
+      </PageIntro>
       <Suspense fallback={<CatalogSkeleton />}>
         {isDemoMode() ? <DemoCatalog /> : <Catalog searchParams={searchParams} />}
       </Suspense>

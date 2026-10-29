@@ -23,7 +23,7 @@ export function AddToCart({ productId, available, maxQuantity }: Props) {
 
   if (!available) {
     return (
-      <p className="rounded-xl bg-surface-muted px-4 py-3 text-sm text-muted">
+      <p className="rounded-md border border-border bg-surface-muted px-4 py-3.5 text-sm text-foreground/80">
         Este produto não está disponível para compra no momento.
       </p>
     );
@@ -40,7 +40,7 @@ export function AddToCart({ productId, available, maxQuantity }: Props) {
   return (
     <div className="space-y-3">
       {remaining > 0 ? (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
           <QuantityInput
             value={chosen}
             max={remaining}
@@ -50,23 +50,23 @@ export function AddToCart({ productId, available, maxQuantity }: Props) {
             }}
             label="Quantidade a adicionar"
           />
-          <button type="button" onClick={handleAdd} className={`${buttonStyles.primary} flex-1 sm:flex-none`}>
+          <button type="button" onClick={handleAdd} className={`${buttonStyles.primary} min-h-12 flex-1 whitespace-nowrap max-[400px]:px-4 max-[400px]:[&>svg]:hidden`}>
             <ShoppingBag aria-hidden className="size-4" />
             Adicionar ao carrinho
           </button>
         </div>
       ) : (
-        <p className="text-sm text-muted">
+        <p className="rounded-md bg-accent-soft px-4 py-3.5 text-sm text-foreground/80">
           Você já adicionou a quantidade máxima disponível deste produto.
         </p>
       )}
 
-      <p aria-live="polite" className="min-h-5 text-sm">
+      <p aria-live="polite" className="text-sm empty:sr-only">
         {added && (
-          <span className="inline-flex items-center gap-1.5 text-success">
+          <span className="inline-flex flex-wrap items-center gap-1.5 text-success">
             <Check aria-hidden className="size-4" />
             Adicionado ao carrinho.{" "}
-            <Link href="/carrinho" className="font-semibold underline underline-offset-2">
+            <Link href="/carrinho" className="font-semibold text-accent underline underline-offset-4 hover:text-accent-hover">
               Ver carrinho
             </Link>
           </span>

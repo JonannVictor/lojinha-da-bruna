@@ -3,7 +3,6 @@
 import { Check, Copy } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useMemo, useState } from "react";
-import { buttonStyles } from "@/components/button-link";
 import { formatPrice } from "@/lib/money";
 import { buildPixPayload, type PixReceiver } from "@/lib/payments/pix";
 
@@ -25,7 +24,7 @@ export function PixPayment({ receiver, amountCents }: { receiver: PixReceiver; a
   }
 
   return (
-    <section aria-labelledby="pix-titulo" className="mt-5 rounded-xl border border-border bg-surface-muted p-4">
+    <section aria-labelledby="pix-titulo" className="mt-5 rounded-md border border-border bg-background p-4">
       <h3 id="pix-titulo" className="text-sm font-semibold">
         1. Pague com Pix
       </h3>
@@ -34,7 +33,7 @@ export function PixPayment({ receiver, amountCents }: { receiver: PixReceiver; a
         <strong className="text-foreground">{formatPrice(amountCents)}</strong>
       </p>
 
-      <div className="mx-auto mt-3 w-fit rounded-lg bg-white p-2.5">
+      <div className="mx-auto mt-3 w-fit rounded-md bg-white p-2.5 ring-1 ring-border">
         <QRCodeSVG
           value={payload}
           size={168}
@@ -54,9 +53,13 @@ export function PixPayment({ receiver, amountCents }: { receiver: PixReceiver; a
           readOnly
           value={payload}
           onFocus={(event) => event.currentTarget.select()}
-          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-2 py-1.5 font-mono text-xs text-muted"
+          className="min-w-0 flex-1 rounded-md border border-border bg-surface px-2 py-1.5 font-mono text-xs text-muted"
         />
-        <button type="button" onClick={copy} className={`${buttonStyles.secondary} shrink-0 px-3 py-1.5 text-xs`}>
+        <button
+          type="button"
+          onClick={copy}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-accent/30 px-3 py-1.5 text-xs font-semibold text-accent transition-colors hover:border-accent hover:bg-accent-soft"
+        >
           {copied === payload ? <Check aria-hidden className="size-3.5" /> : <Copy aria-hidden className="size-3.5" />}
           {copied === payload ? "Copiado" : "Copiar"}
         </button>

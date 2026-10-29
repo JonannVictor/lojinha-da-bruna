@@ -16,13 +16,13 @@ export function CartLink() {
     <Link
       href="/carrinho"
       aria-label={label}
-      className="relative flex size-10 items-center justify-center rounded-full text-foreground hover:bg-surface-muted"
+      className="relative -mr-2 flex size-11 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent-soft hover:text-accent"
     >
-      <ShoppingBag aria-hidden className="size-5" />
+      <ShoppingBag aria-hidden strokeWidth={1.6} className="size-[1.375rem]" />
       {count > 0 && (
         <span
           aria-hidden
-          className="absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] leading-5 font-semibold text-accent-foreground"
+          className="absolute top-0.5 right-0.5 flex min-w-[1.125rem] items-center justify-center rounded-full bg-accent px-1 text-[10px] leading-[1.125rem] font-bold text-accent-foreground ring-2 ring-background"
         >
           {count > 99 ? "99+" : count}
         </span>

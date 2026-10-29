@@ -8,7 +8,7 @@ import type { CartLine } from "@/lib/cart/cart";
 import { submitOrder, type CheckoutState } from "./actions";
 
 const inputClass =
-  "w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none aria-invalid:border-danger";
+  "h-11 w-full rounded-md border border-border bg-background px-3.5 text-sm transition-colors hover:border-rose-light focus:border-accent focus:bg-surface focus:outline-none aria-invalid:border-danger";
 
 /**
  * Collects the customer's details and submits the order. The browser sends
@@ -45,7 +45,7 @@ export function CheckoutForm({
 
   const field = (name: string, label: string, props: InputHTMLAttributes<HTMLInputElement>) => (
     <div className="space-y-1">
-      <label htmlFor={`checkout-${name}`} className="block text-xs font-medium">
+      <label htmlFor={`checkout-${name}`} className="block text-xs font-semibold">
         {label}
       </label>
       <input

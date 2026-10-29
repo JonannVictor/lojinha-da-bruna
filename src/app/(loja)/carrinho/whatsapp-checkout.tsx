@@ -48,7 +48,7 @@ export function WhatsappCheckout({
         </button>
       )}
 
-      <div id="whatsapp-ajuda" className="space-y-2 text-xs text-muted">
+      <div id="whatsapp-ajuda" className="space-y-2 text-xs leading-relaxed text-muted">
         {link ? (
           <p>
             O WhatsApp será aberto com a mensagem pronta para você revisar e

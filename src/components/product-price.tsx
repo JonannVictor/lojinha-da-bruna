@@ -8,7 +8,7 @@ export function ProductPrice({
   className?: string;
 }) {
   if (cents === null) {
-    return <p className={`text-muted ${className}`}>Preço sob consulta</p>;
+    return <p className={`text-muted italic ${className}`}>Preço sob consulta</p>;
   }
-  return <p className={`font-semibold ${className}`}>{formatPrice(cents)}</p>;
+  return <p className={`font-semibold tabular-nums ${className}`}>{formatPrice(cents)}</p>;
 }
