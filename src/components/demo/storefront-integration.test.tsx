@@ -63,7 +63,7 @@ describe("panel and storefront integration", () => {
     const page = renderToStaticMarkup(<ProductDetailView product={product} {...whatsapp} />);
     expect(page).toContain("Esmalte cintilante");
     expect(page).toContain('href="https://wa.me/555481394629?text=');
-    expect(page).toContain(encodeURIComponent("“Esmalte cintilante” (Marca Y)").replace(/'/g, "%27"));
+    expect(page).toContain(encodeURIComponent("*Esmalte cintilante*\nMarca: Marca Y").replace(/'/g, "%27"));
     expect(page).toContain("2 unidades disponíveis");
     expect(page).toContain("Adicionar ao carrinho");
   });

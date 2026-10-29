@@ -18,18 +18,39 @@ export function orderReference(id: string): string {
   return id.replace(/-/g, "").slice(0, 8).toUpperCase();
 }
 
+// Messages use WhatsApp formatting: *bold* for headings, names and totals,
+// _italic_ for notes. Asterisks and underscores in product or customer text
+// would toggle that formatting, so they are removed from interpolated values.
+
+function plain(text: string): string {
+  return text.replace(/[*_~]/g, "").trim();
+}
+
+type ItemLine = { name: string; quantity: number; unitPriceCents: number; lineTotalCents?: number };
+
+function itemBlocks(items: ItemLine[]): string[] {
+  return items.flatMap((item, index) => [
+    `*${index + 1}. ${plain(item.name)}*`,
+    `${item.quantity} un. × ${formatPrice(item.unitPriceCents)} = ${formatPrice(item.lineTotalCents ?? item.quantity * item.unitPriceCents)}`,
+    "",
+  ]);
+}
+
 export function buildOrderMessage(order: SavedOrder): string {
   const lines = [
-    `Olá, Bruna! Quero confirmar o pedido ${orderReference(order.id)}.`,
+    "Olá, Bruna! Tudo bem?",
+    `Gostaria de confirmar o pedido *#${orderReference(order.id)}*, feito pelo site.`,
     "",
-    ...order.items.map(
-      (item) => `• ${item.quantity}× ${item.name} — ${formatPrice(item.lineTotalCents)}`,
-    ),
+    "*RESUMO DO PEDIDO*",
     "",
-    `Subtotal: ${formatPrice(order.subtotalCents)}`,
-    `Nome: ${order.customerName}`,
+    ...itemBlocks(order.items),
+    `*Subtotal: ${formatPrice(order.subtotalCents)}*`,
+    "",
+    "*DADOS DO CLIENTE*",
+    `Nome: ${plain(order.customerName)}`,
   ];
-  if (order.deliveryAddress) lines.push(`Endereço: ${order.deliveryAddress}`);
+  if (order.deliveryAddress) lines.push(`Endereço: ${plain(order.deliveryAddress)}`);
+  lines.push("", "Aguardo a confirmação. Desde já, agradeço!");
   return lines.join("\n");
 }
 
@@ -80,19 +101,16 @@ export function buildCartWhatsappLink(
 
   const totalCents = lines.reduce((sum, line) => sum + line.quantity * line.unitPriceCents, 0);
   const message = withDemoHeader([
-    `Olá, Bruna! Gostaria de fazer um pedido na ${storeName}:`,
+    "Olá, Bruna! Tudo bem?",
+    `Gostaria de fazer um pedido pelo site da *${plain(storeName)}*.`,
     "",
-    ...lines.flatMap((line, index) => [
-      `${index + 1}. ${line.name}`,
-      `   Quantidade: ${line.quantity}`,
-      `   Preço unitário: ${formatPrice(line.unitPriceCents)}`,
-      `   Subtotal: ${formatPrice(line.quantity * line.unitPriceCents)}`,
-    ]),
+    "*RESUMO DO PEDIDO*",
     "",
-    `Total dos produtos: ${formatPrice(totalCents)}`,
+    ...itemBlocks(lines),
+    `*Total dos produtos: ${formatPrice(totalCents)}*`,
+    "_Valor referente apenas aos produtos. Entrega e forma de pagamento a combinar._",
     "",
-    "O valor acima corresponde apenas aos produtos. Entrega e pagamento a combinar.",
-    "Aguardo a confirmação da disponibilidade.",
+    "Aguardo a confirmação da disponibilidade. Desde já, agradeço!",
   ], demo).join("\n");
 
   return { url: buildWhatsappUrl(number, message), message, totalCents };
@@ -105,8 +123,14 @@ export function buildProductWhatsappUrl(
   product: Pick<Product, "name" | "brand" | "price_cents">,
   { demo = false }: MessageOptions = {},
 ): string {
-  const name = product.brand ? `“${product.name}” (${product.brand})` : `“${product.name}”`;
-  const lines = [`Olá, Bruna! Vi na ${storeName} o produto ${name} e gostaria de mais informações.`];
-  if (product.price_cents !== null) lines.push(`Preço no site: ${formatPrice(product.price_cents)}.`);
+  const lines = [
+    "Olá, Bruna! Tudo bem?",
+    `Vi no site da *${plain(storeName)}* o produto abaixo e gostaria de mais informações:`,
+    "",
+    `*${plain(product.name)}*`,
+  ];
+  if (product.brand) lines.push(`Marca: ${plain(product.brand)}`);
+  if (product.price_cents !== null) lines.push(`Preço no site: ${formatPrice(product.price_cents)}`);
+  lines.push("", "Aguardo seu retorno. Desde já, agradeço!");
   return buildWhatsappUrl(number, withDemoHeader(lines, demo).join("\n"));
 }

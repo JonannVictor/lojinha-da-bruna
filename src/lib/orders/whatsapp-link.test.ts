@@ -58,11 +58,25 @@ describe("buildCartWhatsappLink", () => {
 
     const text = decodedText(result.url);
     expect(text).toBe(result.message);
-    expect(text).toContain("Lojinha da Bruna");
-    expect(text).toContain("1. Hidratante corporal (exemplo)\n   Quantidade: 3\n   Preço unitário: R$ 29,00\n   Subtotal: R$ 87,00");
-    expect(text).toContain("2. Colônia floral (exemplo)\n   Quantidade: 1\n   Preço unitário: R$ 89,00\n   Subtotal: R$ 89,00");
-    expect(text).toContain("Total dos produtos: R$ 176,00");
-    expect(text).toContain("apenas aos produtos. Entrega e pagamento a combinar.");
+    expect(text).toBe(
+      [
+        "Olá, Bruna! Tudo bem?",
+        "Gostaria de fazer um pedido pelo site da *Lojinha da Bruna*.",
+        "",
+        "*RESUMO DO PEDIDO*",
+        "",
+        "*1. Hidratante corporal (exemplo)*",
+        "3 un. × R$ 29,00 = R$ 87,00",
+        "",
+        "*2. Colônia floral (exemplo)*",
+        "1 un. × R$ 89,00 = R$ 89,00",
+        "",
+        "*Total dos produtos: R$ 176,00*",
+        "_Valor referente apenas aos produtos. Entrega e forma de pagamento a combinar._",
+        "",
+        "Aguardo a confirmação da disponibilidade. Desde já, agradeço!",
+      ].join("\n"),
+    );
   });
 
   it("never claims the order is confirmed and invents no fees or payment terms", () => {
@@ -127,31 +141,42 @@ describe("buildCartWhatsappLink", () => {
     if (!deactivated.ok) throw new Error(deactivated.reason);
 
     const result = link(cart, storefrontProducts(deactivated.state))!;
-    expect(result.message).toContain("Quantidade: 8");
-    expect(result.message).toContain("Preço unitário: R$ 31,50");
+    expect(result.message).toContain("8 un. × R$ 31,50 = R$ 252,00");
     expect(result.message).not.toContain("Colônia");
     expect(result.totalCents).toBe(8 * 3150);
   });
 });
-
 describe("buildProductWhatsappUrl", () => {
   it("starts a conversation about the product", () => {
     const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, colonia));
     expect(text).toBe(
-      "Olá, Bruna! Vi na Lojinha da Bruna o produto “Colônia floral (exemplo)” (Marca fictícia) e gostaria de mais informações.\nPreço no site: R$ 89,00.",
+      [
+        "Olá, Bruna! Tudo bem?",
+        "Vi no site da *Lojinha da Bruna* o produto abaixo e gostaria de mais informações:",
+        "",
+        "*Colônia floral (exemplo)*",
+        "Marca: Marca fictícia",
+        "Preço no site: R$ 89,00",
+        "",
+        "Aguardo seu retorno. Desde já, agradeço!",
+      ].join("\n"),
     );
   });
 
   it("starts with the demonstration notice in demo mode", () => {
     const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, colonia, { demo: true }));
     expect(text.split("\n")[0]).toBe(DEMO_MESSAGE_HEADER);
-    expect(text).toContain("o produto “Colônia floral (exemplo)”");
+    expect(text).toContain("*Colônia floral (exemplo)*");
   });
 
   it("omits the price when it is pending and the brand when missing", () => {
     const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, { ...shampoo, brand: null }));
-    expect(text).toBe(
-      "Olá, Bruna! Vi na Lojinha da Bruna o produto “Shampoo nutritivo (exemplo)” e gostaria de mais informações.",
-    );
+    expect(text).toContain("*Shampoo nutritivo (exemplo)*\n\nAguardo seu retorno.");
+    expect(text).not.toMatch(/Marca|Preço/);
+  });
+
+  it("strips WhatsApp formatting characters from product data", () => {
+    const text = decodedText(buildProductWhatsappUrl(NUMBER, STORE, { ...colonia, name: "*Promo* _kit_" }));
+    expect(text).toContain("\n*Promo kit*\n");
   });
 });

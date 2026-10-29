@@ -89,9 +89,10 @@ describe("WhatsApp message", () => {
   it("lists the saved items, subtotal and reference", () => {
     const message = buildOrderMessage(order);
     expect(orderReference(ORDER)).toBe("ABCDEF12");
-    expect(message).toContain("pedido ABCDEF12");
-    expect(message).toContain("2× Sérum");
-    expect(message).toMatch(/Subtotal: R\$\s59,80/);
+    expect(message).toContain("pedido *#ABCDEF12*");
+    expect(message).toMatch(/\*1\. Sérum\*\n2 un\. × R\$\s29,90 = R\$\s59,80\n/);
+    expect(message).toMatch(/\*Subtotal: R\$\s59,80\*/);
+    expect(message).toContain("Nome: Ana");
     expect(message).toContain("Endereço: Rua A, 1");
   });
 
@@ -143,7 +144,7 @@ describe("placeOrder", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.orderId).toBe(ORDER);
-      expect(decodeURIComponent(result.whatsappUrl)).toContain("2× Sérum");
+      expect(decodeURIComponent(result.whatsappUrl)).toContain("*1. Sérum*");
       expect(result.whatsappUrl.startsWith(`https://wa.me/${NUMBER}?text=`)).toBe(true);
     }
   });
