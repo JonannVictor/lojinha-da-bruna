@@ -76,8 +76,7 @@ em `https://lojinha-da-bruna.vercel.app` (público, sem login da Vercel).
    novo deploy (push em `master` ou *Redeploy*). Um deploy anterior continua
    como estava; por exemplo, o que mostra “Catálogo em preparação”.
 3. Confira em `https://lojinha-da-bruna.vercel.app/produtos`, numa janela
-   anônima: a faixa amarela “Demonstração: …” aparece no topo e são listados
-   sete produtos “(exemplo)”.
+   anônima: são listados sete produtos “(exemplo)”.
 
 Preview continua podendo usar só `NEXT_PUBLIC_DEMO_MODE=true`, mas os deploys
 de Preview exigem login na Vercel (*Deployment Protection*).
@@ -106,8 +105,9 @@ aparelhos continuam vendo os dados iniciais.
 - Painel: `http://localhost:3000/admin` (sem login; `/admin/login` apenas
   explica isso e leva ao painel)
 
-Uma faixa amarela identifica a demonstração na loja e no painel, e o
-carrinho avisa que os produtos são fictícios antes de abrir o WhatsApp.
+Uma faixa amarela identifica a demonstração no painel (a loja não exibe
+aviso), e o carrinho avisa que os produtos são fictícios antes de abrir o
+WhatsApp.
 
 ## O que dá para fazer
 

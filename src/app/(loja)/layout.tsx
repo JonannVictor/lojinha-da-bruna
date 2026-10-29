@@ -1,4 +1,3 @@
-import { DemoBanner } from "@/components/demo-banner";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
@@ -6,7 +5,6 @@ import { SiteHeader } from "@/components/site-header";
 export default function StoreLayout({ children }: LayoutProps<"/">) {
   return (
     <>
-      <DemoBanner />
       <SiteHeader />
       <main id="conteudo" className="flex-1">
         {children}
