@@ -61,7 +61,7 @@ function input(overrides: Partial<ProductInput> = {}): ProductInput {
 }
 
 describe("seed", () => {
-  it("reads like the final store, names no brand and is pictured by bundled illustrations", () => {
+  it("reads like the final store, names no brand and is pictured by bundled photos", () => {
     const state = seed();
     expect(state.products.length).toBeGreaterThan(0);
     for (const product of state.products) {
@@ -70,7 +70,7 @@ describe("seed", () => {
       expect(product.images).toHaveLength(1);
       const [image] = product.images;
       expect(image.url.startsWith(`${DEMO_IMAGE_DIR}/`)).toBe(true);
-      expect(image.alt).toMatch(/^Ilustração /);
+      expect(image.alt).toMatch(/^Foto /);
       expect(existsSync(join(process.cwd(), "public", image.url))).toBe(true);
     }
     expect(state.orders.every((o) => o.code.startsWith("PED-") && !/demonstra/i.test(o.customer_name))).toBe(true);
@@ -275,6 +275,22 @@ describe("parseDemoState", () => {
     expect(parseDemoState([])).toBeNull();
     expect(parseDemoState({ ...seed(), version: 99 })).toBeNull();
     expect(parseDemoState({ version: 1, products: "x", categories: [], orders: [] })).toBeNull();
+  });
+
+  it("moves images stored before the photos from the old drawings to the photos", () => {
+    const state = seed();
+    const raw = JSON.parse(JSON.stringify(state));
+    raw.products[0].images = [
+      { id: "old", url: `${DEMO_IMAGE_DIR}/paleta-de-sombras.webp`, alt: "Ilustração de uma paleta" },
+      { id: "up", url: PIXEL, alt: "foto enviada" },
+    ];
+
+    const images = parseDemoState(raw)!.products[0].images;
+    expect(images).toEqual([
+      { id: "old", url: `${DEMO_IMAGE_DIR}/paleta-de-sombras-foto.webp`, alt: "" },
+      { id: "up", url: PIXEL, alt: "foto enviada" },
+    ]);
+    expect(existsSync(join(process.cwd(), "public", images[0].url))).toBe(true);
   });
 
   it("drops malformed records one by one", () => {

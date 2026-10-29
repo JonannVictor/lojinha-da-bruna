@@ -30,7 +30,7 @@ export function WhatsappCheckout({
           target="_blank"
           rel="noopener noreferrer"
           aria-describedby="whatsapp-ajuda"
-          className={`${buttonStyles.primary} w-full`}
+          className={`${buttonStyles.primary} min-h-13 w-full text-[0.9375rem] shadow-card`}
         >
           <MessageCircle aria-hidden className="size-4" />
           Finalizar pedido pelo WhatsApp
@@ -41,7 +41,7 @@ export function WhatsappCheckout({
           type="button"
           disabled
           aria-describedby="whatsapp-ajuda"
-          className={`${buttonStyles.primary} w-full`}
+          className={`${buttonStyles.primary} min-h-13 w-full text-[0.9375rem] shadow-card`}
         >
           <MessageCircle aria-hidden className="size-4" />
           Finalizar pedido pelo WhatsApp

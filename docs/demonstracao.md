@@ -133,7 +133,8 @@ com nomes “(exemplo)”, é apagada sozinha na primeira visita.)
 ## Dados iniciais
 
 Oito produtos com nome e descrição de loja de verdade, sem marca, cada um com
-uma ilustração própria em `public/demo/produtos`; as quatro categorias do
+uma foto ilustrativa do Pexels, sem marca visível, em `public/demo/produtos`
+(fontes em [creditos-imagens.md](creditos-imagens.md)); as quatro categorias do
 briefing; e três pedidos `PED-001` a `PED-003` com nomes de clientes
 inventados. **Nenhum deles foi confirmado pela Bruna**: preços, estoques e
 descrições são provisórios e devem ser substituídos pelo catálogo real. Os

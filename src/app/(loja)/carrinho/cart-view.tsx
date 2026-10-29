@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, ShoppingBag, Trash2 } from "lucide-react";
+import { AlertCircle, ArrowRight, ShoppingBag, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { buttonStyles, ButtonLink } from "@/components/button-link";
@@ -138,8 +138,13 @@ function EmptyCart() {
       <EmptyState
         icon={<ShoppingBag aria-hidden strokeWidth={1.6} className="size-6" />}
         title="Seu carrinho está vazio"
-        description="Explore o catálogo e adicione os produtos que você deseja."
-        action={<ButtonLink href="/produtos">Explorar produtos</ButtonLink>}
+        description="Explore o catálogo e escolha seus produtos. Depois, é só finalizar o pedido com a Bruna pelo WhatsApp."
+        action={
+          <ButtonLink href="/produtos" className="min-h-12 px-7">
+            Ver o catálogo
+            <ArrowRight aria-hidden className="size-4" />
+          </ButtonLink>
+        }
       />
     </div>
   );
@@ -166,7 +171,7 @@ function CartContents({
   return (
     <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_23rem] lg:items-start lg:gap-14">
       <div>
-        <ul className="divide-y divide-border border-y border-border">
+        <ul className="divide-y divide-border rounded-lg border border-border bg-surface px-3.5 shadow-card sm:px-6">
           {items.map((item) => (
             <CartRow key={item.line.productId} item={item} />
           ))}
@@ -176,9 +181,9 @@ function CartContents({
         <div className="sticky bottom-0 z-10 -mx-4 mt-4 flex items-center justify-between gap-4 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:hidden">
           <div>
             <p className="text-xs text-muted">Total dos produtos</p>
-            <p className="text-lg font-semibold tabular-nums">{formatPrice(subtotalCents)}</p>
+            <p className="text-xl font-semibold text-accent tabular-nums">{formatPrice(subtotalCents)}</p>
           </div>
-          <a href="#resumo" className={buttonStyles.primary}>
+          <a href="#resumo" className={`${buttonStyles.primary} min-h-12 px-7`}>
             Finalizar
           </a>
         </div>
@@ -186,14 +191,14 @@ function CartContents({
 
       <aside
         aria-labelledby="resumo"
-        className="rounded-md border border-border bg-surface p-5 sm:p-6 lg:sticky lg:top-28"
+        className="rounded-lg border border-border bg-surface p-5 shadow-card sm:p-6 lg:sticky lg:top-28"
       >
         <h2 id="resumo" className="font-display text-2xl font-medium">
           Resumo do pedido
         </h2>
-        <dl className="mt-5 flex items-baseline justify-between border-t border-border pt-5">
-          <dt className="text-sm text-muted">Total dos produtos</dt>
-          <dd className="text-xl font-semibold tabular-nums">{formatPrice(subtotalCents)}</dd>
+        <dl className="mt-5 flex items-baseline justify-between gap-4 border-t border-border pt-5">
+          <dt className="text-sm font-medium">Total dos produtos</dt>
+          <dd className="text-[1.75rem] leading-none font-semibold text-accent tabular-nums">{formatPrice(subtotalCents)}</dd>
         </dl>
         {hasUnavailable && (
           <p className="mt-3 rounded-md bg-warning-soft px-3 py-2 text-xs text-warning">
@@ -240,8 +245,8 @@ function CartRow({ item }: { item: CartItem }) {
   const name = product?.name ?? "Produto não encontrado";
 
   return (
-    <li className="flex gap-4 py-5 sm:gap-6">
-      <div className={`w-22 shrink-0 overflow-hidden rounded-md sm:w-28 ${purchasable ? "" : "opacity-60"}`}>
+    <li className="flex gap-3 py-5 sm:gap-5">
+      <div className={`w-20 shrink-0 self-start overflow-hidden rounded-md border border-border sm:w-28 ${purchasable ? "" : "opacity-60"}`}>
         <ProductImage image={product?.images[0]} sizes="112px" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-3">
@@ -251,15 +256,15 @@ function CartRow({ item }: { item: CartItem }) {
             {product ? (
               <Link
                 href={`/produtos/${product.slug}`}
-                className="mt-0.5 block leading-snug font-medium hover:text-accent"
+                className="mt-0.5 block font-display text-lg leading-tight font-semibold transition-colors hover:text-accent sm:text-xl"
               >
                 {name}
               </Link>
             ) : (
-              <p className="font-medium">{name}</p>
+              <p className="font-display text-lg leading-tight font-semibold sm:text-xl">{name}</p>
             )}
             {purchasable && product?.price_cents != null && (
-              <p className="mt-0.5 text-sm text-muted tabular-nums">
+              <p className="mt-1 text-sm text-muted tabular-nums">
                 {formatPrice(product.price_cents)} cada
               </p>
             )}
@@ -275,21 +280,21 @@ function CartRow({ item }: { item: CartItem }) {
             type="button"
             onClick={() => cart.remove(line.productId)}
             aria-label={`Remover ${name} do carrinho`}
-            className="-mt-2 -mr-2 flex size-10 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-danger-soft hover:text-danger"
+            className="-mt-2.5 -mr-2.5 flex size-11 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-danger-soft hover:text-danger"
           >
             <Trash2 aria-hidden strokeWidth={1.6} className="size-[1.125rem]" />
           </button>
         </div>
 
         {purchasable && (
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
             <QuantityInput
               value={Math.min(line.quantity, maxQuantity)}
               max={maxQuantity}
               onChange={(value) => cart.setQuantity(line.productId, value, maxQuantity)}
               label={`Quantidade de ${name}`}
             />
-            <p className="font-semibold tabular-nums">{formatPrice(totalCents)}</p>
+            <p className="ml-auto text-base font-semibold tabular-nums sm:text-lg">{formatPrice(totalCents)}</p>
           </div>
         )}
       </div>
@@ -303,10 +308,10 @@ function CartSkeleton() {
       <span className="sr-only">Carregando carrinho…</span>
       <div aria-hidden className="space-y-4">
         {Array.from({ length: 2 }, (_, i) => (
-          <div key={i} className="h-32 animate-pulse rounded-md bg-surface-muted" />
+          <div key={i} className="h-32 animate-pulse rounded-lg bg-surface-muted" />
         ))}
       </div>
-      <div aria-hidden className="h-72 animate-pulse rounded-md bg-surface-muted" />
+      <div aria-hidden className="h-72 animate-pulse rounded-lg bg-surface-muted" />
     </div>
   );
 }

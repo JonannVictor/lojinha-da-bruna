@@ -55,6 +55,9 @@
   --color-danger-soft: var(--danger-soft);
   --font-sans: var(--font-body);
   --font-display: var(--font-heading);
+  /* Soft, warm elevation for cards and panels (shadow-card, shadow-lift). */
+  --shadow-card: 0 1px 2px rgb(53 39 42 / 0.04), 0 6px 18px -12px rgb(53 39 42 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(53 39 42 / 0.04), 0 18px 36px -18px rgb(53 39 42 / 0.28);
 }
 
 /* Small uppercase label above titles ("Perfumaria", "Destaques"). */

@@ -26,7 +26,7 @@ export function CategoryLinks({ categories }: { categories: Category[] }) {
         <li key={category.slug}>
           <Link
             href={`/produtos?categoria=${category.slug}`}
-            className={`group relative flex h-36 flex-col justify-between overflow-hidden rounded-md p-4 transition-colors sm:h-44 sm:p-6 ${tones[index % tones.length]} hover:bg-accent hover:text-accent-foreground`}
+            className={`group relative flex h-36 flex-col justify-between overflow-hidden rounded-lg p-4 transition-colors sm:h-44 sm:p-6 ${tones[index % tones.length]} hover:bg-accent hover:text-accent-foreground`}
           >
             <span
               aria-hidden
@@ -55,7 +55,7 @@ export function CategoriesSkeleton() {
   return (
     <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-hidden>
       {Array.from({ length: 4 }, (_, i) => (
-        <div key={i} className="h-36 animate-pulse rounded-md bg-surface-muted sm:h-44" />
+        <div key={i} className="h-36 animate-pulse rounded-lg bg-surface-muted sm:h-44" />
       ))}
     </div>
   );

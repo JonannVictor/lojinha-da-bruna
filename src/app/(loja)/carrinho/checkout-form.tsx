@@ -77,7 +77,7 @@ export function CheckoutForm({
       <button
         type="submit"
         disabled={disabled || pending || state.status === "success"}
-        className={`${buttonStyles.primary} w-full`}
+        className={`${buttonStyles.primary} min-h-13 w-full text-[0.9375rem] shadow-card`}
       >
         {pending && <LoaderCircle aria-hidden className="size-4 animate-spin" />}
         {pending ? "Registrando pedido…" : "Finalizar pedido pelo WhatsApp"}

@@ -41,21 +41,15 @@ export function QuickAdd({
             ? `${productName}: quantidade máxima já está no carrinho`
             : `Adicionar ${productName} ao carrinho`
         }
-        title={full && !added ? "Quantidade máxima no carrinho" : "Adicionar ao carrinho"}
-        className={`absolute right-2.5 bottom-2.5 z-10 flex h-10 items-center justify-center gap-1.5 rounded-full shadow-[0_6px_16px_-8px_rgb(53_39_42/0.45)] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 sm:right-3 sm:bottom-3 ${
+        title={full && !added ? "Quantidade máxima no carrinho" : added ? "Adicionado ao carrinho" : "Adicionar ao carrinho"}
+        // Sits in the card's price row, above the card-wide link (z-10).
+        className={`relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
           added
-            ? "bg-accent px-3.5 text-xs font-semibold text-accent-foreground"
-            : "w-10 bg-surface text-accent hover:bg-accent hover:text-accent-foreground"
+            ? "border-accent bg-accent text-accent-foreground"
+            : "border-accent/25 bg-surface text-accent hover:border-accent hover:bg-accent hover:text-accent-foreground disabled:hover:border-accent/25 disabled:hover:bg-surface disabled:hover:text-accent"
         }`}
       >
-        {added ? (
-          <>
-            <Check aria-hidden className="size-4" />
-            Adicionado
-          </>
-        ) : (
-          <Plus aria-hidden className="size-[1.125rem]" />
-        )}
+        {added ? <Check aria-hidden className="size-4" /> : <Plus aria-hidden className="size-[1.125rem]" />}
       </button>
       <span aria-live="polite" className="sr-only">
         {added ? `${productName} adicionado ao carrinho.` : ""}

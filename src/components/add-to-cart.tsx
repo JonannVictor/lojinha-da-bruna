@@ -40,7 +40,8 @@ export function AddToCart({ productId, available, maxQuantity }: Props) {
   return (
     <div className="space-y-3">
       {remaining > 0 ? (
-        <div className="flex items-center gap-3">
+        // Narrow boxes: the button drops below the quantity, at full width.
+        <div className="flex flex-wrap items-center gap-3">
           <QuantityInput
             value={chosen}
             max={remaining}
@@ -50,7 +51,7 @@ export function AddToCart({ productId, available, maxQuantity }: Props) {
             }}
             label="Quantidade a adicionar"
           />
-          <button type="button" onClick={handleAdd} className={`${buttonStyles.primary} min-h-12 flex-1 whitespace-nowrap max-[400px]:px-4 max-[400px]:[&>svg]:hidden`}>
+          <button type="button" onClick={handleAdd} className={`${buttonStyles.primary} min-h-12 min-w-48 flex-1 whitespace-nowrap`}>
             <ShoppingBag aria-hidden className="size-4" />
             Adicionar ao carrinho
           </button>

@@ -13,14 +13,14 @@ export const DEMO_STATE_VERSION = 1;
 export const MAX_DEMO_IMAGES_PER_PRODUCT = 3;
 const MAX_ACTIVITY = 30;
 
-/** Folder in public/ with the illustrations of the initial products. */
+/** Folder in public/ with the photos of the initial products. */
 export const DEMO_IMAGE_DIR = "/demo/produtos";
 
 export type DemoImage = {
   id: string;
   /**
    * data:image/... URL (compressed in the browser before saving), or one of
-   * the bundled illustrations under DEMO_IMAGE_DIR.
+   * the bundled photos under DEMO_IMAGE_DIR.
    */
   url: string;
   alt: string;
@@ -384,7 +384,7 @@ export function isDataImageUrl(value: unknown): value is string {
 
 const BUNDLED_IMAGE = new RegExp(String.raw`^${DEMO_IMAGE_DIR}/[a-z0-9-]{1,60}\.webp$`);
 
-/** Uploaded photo or bundled illustration: the only URLs read from storage. */
+/** Uploaded photo or bundled photo: the only URLs read from storage. */
 export function isDemoImageUrl(value: unknown): value is string {
   return isDataImageUrl(value) || (typeof value === "string" && BUNDLED_IMAGE.test(value));
 }
@@ -404,8 +404,18 @@ function parseCategory(raw: unknown): DemoCategory | null {
   return { id, name, slug, is_active, position: Number.isFinite(position) ? (position as number) : 0 };
 }
 
+// The initial products were pictured by drawings until their photos arrived
+// under new names (so no image cache serves an old drawing). A stored state
+// still pointing to a drawing gets the photo; the drawing's alt text no longer
+// applies, so the storefront falls back to the product name.
+const RETIRED_DRAWING = new RegExp(
+  String.raw`^${DEMO_IMAGE_DIR}/(paleta-de-sombras|colonia-floral|hidratante-corporal|necessaire-de-viagem|body-splash|base-liquida|shampoo-nutritivo|kit-presente)\.webp$`,
+);
+
 function parseImage(raw: unknown): DemoImage | null {
   if (!isObject(raw) || !nonEmpty(raw.id) || !isDemoImageUrl(raw.url)) return null;
+  const drawing = RETIRED_DRAWING.exec(raw.url);
+  if (drawing) return { id: raw.id, url: `${DEMO_IMAGE_DIR}/${drawing[1]}-foto.webp`, alt: "" };
   return { id: raw.id, url: raw.url, alt: str(raw.alt) ? raw.alt : "" };
 }
 

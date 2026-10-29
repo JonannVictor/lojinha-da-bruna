@@ -1,8 +1,9 @@
 import { ArrowRight, HeartHandshake, MessageCircle, ShoppingBag, UserRoundCheck } from "lucide-react";
+import Image from "next/image";
 import { Suspense } from "react";
+import heroImage from "@/assets/hero-boutique.webp";
 import { buttonStyles, ButtonLink } from "@/components/button-link";
 import { DemoCategories, DemoFeaturedProducts } from "@/components/demo/storefront";
-import { HeroArt } from "@/components/hero-art";
 import {
   CategoriesSkeleton,
   CategoryLinks,
@@ -41,36 +42,47 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="overflow-hidden">
-        <div className="container-page grid items-center gap-10 pt-10 pb-14 md:grid-cols-[1.15fr_0.85fr] md:gap-12 md:py-16 lg:gap-20 lg:py-20">
-          <div>
+      {/* Phones and tablets: the picture, then the text. Desktop: the text
+          sits on the empty cream side of the picture. */}
+      <section className="container-page pt-4 sm:pt-6 lg:pt-8">
+        <div className="relative overflow-hidden rounded-lg lg:aspect-[16/9] lg:max-h-[40rem] lg:w-full">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-lg sm:aspect-[16/9] lg:absolute lg:inset-0 lg:aspect-auto lg:rounded-none">
+            {/* Stock photo (Pexels, unlabeled bottle, mirrored): ambience only, not a product for sale. */}
+            <Image
+              src={heroImage}
+              alt=""
+              fill
+              sizes="(min-width: 76rem) 72rem, calc(100vw - 2rem)"
+              placeholder="blur"
+              loading="eager"
+              fetchPriority="high"
+              className="object-cover object-[88%_60%] sm:object-center"
+            />
+          </div>
+          <div className="pt-7 pb-4 sm:pt-9 lg:absolute lg:inset-y-0 lg:left-0 lg:flex lg:w-[48%] lg:flex-col lg:justify-center lg:py-12 lg:pr-4 lg:pl-14 xl:pl-18">
             <p className="eyebrow">Beleza · Perfumaria · Cuidados pessoais</p>
-            <h1 className="mt-4 font-display text-[2.6rem] leading-[1.05] font-medium text-balance sm:text-6xl lg:text-[4.25rem]">
+            <h1 className="mt-3 font-display text-[2.6rem] leading-[1.04] font-medium text-balance sm:text-6xl lg:mt-4 lg:text-[3.75rem] xl:text-[4.25rem]">
               Pequenos rituais de <em className="text-accent">beleza e cuidado</em>
             </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-muted sm:text-lg">
-              {storeConfig.tagline}. Escolha com calma, monte seu carrinho e
-              finalize o pedido com a Bruna pelo WhatsApp.
+            <p className="mt-4 max-w-md text-base leading-relaxed text-foreground/80 sm:text-lg lg:mt-5">
+              Escolha com calma e finalize o pedido com a Bruna pelo WhatsApp.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/produtos">
-                Explorar produtos
+            <div className="mt-7 flex flex-wrap gap-3 lg:mt-9">
+              <ButtonLink href="/produtos" className="min-h-12 px-7 shadow-card">
+                Ver o catálogo
                 <ArrowRight aria-hidden className="size-4" />
               </ButtonLink>
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={buttonStyles.secondary}
+                className={`${buttonStyles.secondary} min-h-12 bg-surface/60`}
               >
                 <MessageCircle aria-hidden className="size-4" />
                 Falar com a Bruna
                 <span className="sr-only">(abre em nova aba)</span>
               </a>
             </div>
-          </div>
-          <div className="mx-auto w-full max-w-[13.5rem] sm:max-w-[16rem] md:max-w-sm">
-            <HeroArt />
           </div>
         </div>
       </section>
@@ -119,7 +131,7 @@ export default function HomePage() {
       </section>
 
       <section aria-labelledby="atendimento" className="container-page pt-16 sm:pt-24">
-        <div className="relative overflow-hidden rounded-md bg-rose-light px-6 py-12 sm:px-12 sm:py-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
+        <div className="relative overflow-hidden rounded-lg bg-rose-light px-6 py-12 sm:px-12 sm:py-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
           <span
             aria-hidden
             className="pointer-events-none absolute -top-36 -right-36 size-64 rounded-full border border-rose/70 lg:-top-24 lg:-right-16 lg:size-72"

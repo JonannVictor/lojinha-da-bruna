@@ -11,7 +11,7 @@ export function ProductGallery({ images }: { images: ProductImageType[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="overflow-hidden rounded-md">
+      <div className="overflow-hidden rounded-lg border border-border shadow-card">
         <ProductImage image={current} sizes="(min-width: 1024px) 45vw, (min-width: 768px) 50vw, 100vw" priority />
       </div>
       {images.length > 1 && (
@@ -23,7 +23,7 @@ export function ProductGallery({ images }: { images: ProductImageType[] }) {
                 onClick={() => setSelected(index)}
                 aria-pressed={index === selected}
                 aria-label={`Ver foto ${index + 1} de ${images.length}`}
-                className={`block w-full overflow-hidden rounded-md border-2 transition-colors ${
+                className={`block w-full overflow-hidden rounded-lg border-2 transition-colors ${
                   index === selected ? "border-accent" : "border-transparent hover:border-rose-light"
                 }`}
               >
